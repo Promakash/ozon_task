@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package shortener;
+
+option go_package = "promakash.urlshortener.v1;urlshortenerv1";
+
+service URLShortener{
+  rpc ShortenURL (ShortenURLRequest) returns (ShortenURLResponse);
+  rpc ResolveURL (ResolveURLRequest) returns (ResolveURLResponse);
+}
+
+message ShortenURLRequest{
+  string original_url = 1;
+}
+
+message ShortenURLResponse{
+  string shortened_url = 1;
+}
+
+message ResolveURLRequest{
+  string shortened_url = 1;
+}
+
+message ResolveURLResponse{
+  string original_url = 1;
+}
