@@ -5,16 +5,14 @@ import (
 	"math/big"
 )
 
-const allowedSymbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"
-
-func NewRandomString(size int) (string, error) {
+func NewRandomString(size int, alphabet string) (string, error) {
 	b := make([]byte, size)
 	for i := range b {
-		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(allowedSymbols))))
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(alphabet))))
 		if err != nil {
 			return "", err
 		}
-		b[i] = allowedSymbols[num.Int64()]
+		b[i] = alphabet[num.Int64()]
 	}
 
 	return string(b), nil

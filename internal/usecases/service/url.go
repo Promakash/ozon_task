@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"ozon_task/domain"
 	"ozon_task/internal/repository"
@@ -20,20 +21,41 @@ func NewURLService(log *slog.Logger, repo repository.URL) *URLService {
 	}
 }
 
-func (s *URLService) ShortenURL(original domain.URL) (domain.URL, error) {
-	const ShortenedURLSize = 10
+func (s *URLService) generateURL(ctx context.Context) (domain.URL, error) {
+	for {
+		select {
+		case <-ctx.Done():
+			return "", ctx.Err()
 
-	shorted, err := s.repo.GetShortenedURLByOriginal(context.TODO(), original)
+		default:
+			newURL, err := pkgrandom.NewRandomString(domain.ShortenedURLSize, domain.AllowedSymbols)
+			if err != nil {
+				return "", err
+			}
+
+			_, err = s.repo.GetOriginalURLByShortened(ctx, newURL)
+			if !errors.Is(err, domain.ErrOriginalNotFound) {
+				continue
+			}
+
+			return newURL, nil
+		}
+	}
+}
+
+func (s *URLService) ShortenURL(ctx context.Context, original domain.URL) (domain.URL, error) {
+
+	shortened, err := s.repo.GetShortenedURLByOriginal(ctx, original)
 	if err == nil {
-		return shorted, nil
+		return shortened, nil
 	}
 
-	newURL, err := pkgrandom.NewRandomString(ShortenedURLSize)
+	newURL, err := s.generateURL(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	err = s.repo.PutShortenedURL(context.TODO(), original, &newURL)
+	err = s.repo.PutShortenedURL(ctx, original, &newURL)
 	if err != nil {
 		return "", err
 	}
@@ -41,8 +63,8 @@ func (s *URLService) ShortenURL(original domain.URL) (domain.URL, error) {
 	return newURL, nil
 }
 
-func (s *URLService) ResolveURL(shorted domain.URL) (domain.URL, error) {
-	original, err := s.repo.GetOriginalURLByShortened(context.TODO(), shorted)
+func (s *URLService) ResolveURL(ctx context.Context, shorted domain.URL) (domain.URL, error) {
+	original, err := s.repo.GetOriginalURLByShortened(ctx, shorted)
 	if err != nil {
 		return "", err
 	}
