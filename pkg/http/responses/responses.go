@@ -74,3 +74,9 @@ func Unknown(err error) *ErrorResponse {
 		err:        err,
 	}
 }
+
+func RequestTimeout(err error) *ErrorResponse {
+	return &ErrorResponse{
+		statusCode: http.StatusRequestTimeout,
+	}
+}

@@ -22,8 +22,8 @@ func Register(gRPC *grpc.Server, URL usecases.URL) {
 }
 
 func (s *gRPCURLService) ShortenURL(ctx context.Context, request *urlshortenerv1.ShortenURLRequest) (*urlshortenerv1.ShortenURLResponse, error) {
-	if !domain.IsValidOriginalURL(request.GetOriginalUrl()) {
-		return nil, status.Error(codes.InvalidArgument, "invalid original url")
+	if ok := domain.IsValidOriginalURL(request.GetOriginalUrl()); !ok {
+		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidOriginal.Error())
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, s.responseTimeout)
@@ -40,8 +40,8 @@ func (s *gRPCURLService) ShortenURL(ctx context.Context, request *urlshortenerv1
 }
 
 func (s *gRPCURLService) ResolveURL(ctx context.Context, request *urlshortenerv1.ResolveURLRequest) (*urlshortenerv1.ResolveURLResponse, error) {
-	if !domain.IsValidShortenedURL(request.ShortenedUrl) {
-		return nil, status.Error(codes.InvalidArgument, "bad shortened url format")
+	if ok := domain.IsValidShortenedURL(request.ShortenedUrl); !ok {
+		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidShortened.Error())
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, s.responseTimeout)
