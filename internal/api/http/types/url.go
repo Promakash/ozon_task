@@ -24,7 +24,7 @@ func CreatePostShorURLRequest(r *http.Request) (*PostShortURLRequest, error) {
 	return req, nil
 }
 
-type PostShorURLResponse struct {
+type PostShortURLResponse struct {
 	ShortenedURL domain.URL `json:"shortened_url"`
 }
 

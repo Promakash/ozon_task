@@ -65,7 +65,10 @@ func RouterOptions(options ...RouterOption) func(chi.Router) {
 
 func WithHealthHandler() RouterOption {
 	return func(r chi.Router) {
-		middleware.Heartbeat("/health")
+		r.Mount("/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			render.Status(r, http.StatusOK)
+			render.PlainText(w, r, "OK")
+		}))
 	}
 }
 

@@ -1,0 +1,2 @@
+{"time":"2025-02-08T18:39:50.309715824Z","level":"INFO","msg":"Starting URL Shortener","config":{"HTTPServer":{"Address":":8080","ReadTimeout":5000000000,"WriteTimeout":5000000000,"IdleTimeout":30000000000,"OperationsTimeout":4000000000},"GRPC":{"Port":5050,"OperationsTimeout":5000000000},"PG":{"Host":"storage","Port":5432,"User":"postgres","Password":"password","DBName":"postgres"},"Logger":{"Level":"debug","Format":"json","Directory":"/app/logs"}}}
+{"time":"2025-02-08T18:39:50.31025779Z","level":"INFO","msg":"logger middleware enabled","component":"middleware/logger"}

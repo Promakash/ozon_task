@@ -75,8 +75,12 @@ func Unknown(err error) *ErrorResponse {
 	}
 }
 
+const TimeoutError = "Request timeout"
+
 func RequestTimeout(err error) *ErrorResponse {
 	return &ErrorResponse{
 		statusCode: http.StatusRequestTimeout,
+		Message:    TimeoutError,
+		err:        err,
 	}
 }

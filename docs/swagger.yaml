@@ -1,0 +1,98 @@
+basePath: /api/v1/
+definitions:
+  responses.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  types.GetOriginalURLResponse:
+    properties:
+      originalURL:
+        type: string
+    type: object
+  types.PostShortURLRequest:
+    properties:
+      original_url:
+        type: string
+    type: object
+  types.PostShortURLResponse:
+    properties:
+      shortened_url:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for URL Shortener service
+  termsOfService: http://swagger.io/terms/
+  title: URL Shortener API
+  version: "1.0"
+paths:
+  /urls:
+    post:
+      consumes:
+      - application/json
+      description: Accepts a JSON payload containing the original URL and returns
+        a generated shortened URL.
+      parameters:
+      - description: JSON payload with the original URL
+        in: body
+        name: original_url
+        required: true
+        schema:
+          $ref: '#/definitions/types.PostShortURLRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Shortened URL successfully created or retrieved
+          schema:
+            $ref: '#/definitions/types.PostShortURLResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "408":
+          description: Request timeout (e.g. user disconnect or service timeout)
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Create shortened URL
+  /urls/{shortened}:
+    get:
+      description: Given a shortened URL, returns the original URL.
+      parameters:
+      - description: Shortened URL (must be exactly 10 characters long and consist
+          only of uppercase and lowercase English letters, digits, and underscore)
+        in: path
+        name: shortened
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Original URL successfully retrieved
+          schema:
+            $ref: '#/definitions/types.GetOriginalURLResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "404":
+          description: Shortened URL not found
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "408":
+          description: Request timeout (e.g. user disconnect or service timeout)
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Retrieve original URL
+swagger: "2.0"

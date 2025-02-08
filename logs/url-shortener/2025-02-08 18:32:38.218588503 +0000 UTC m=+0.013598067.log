@@ -1,0 +1,8 @@
+{"time":"2025-02-08T18:32:38.218673345Z","level":"INFO","msg":"Starting URL Shortener","config":{"HTTPServer":{"Address":":8080","ReadTimeout":5000000000,"WriteTimeout":5000000000,"IdleTimeout":30000000000,"OperationsTimeout":4000000000},"GRPC":{"Port":5050,"OperationsTimeout":5000000000},"PG":{"Host":"storage","Port":5432,"User":"postgres","Password":"password","DBName":"postgres"},"Logger":{"Level":"debug","Format":"json","Directory":"/app/logs"}}}
+{"time":"2025-02-08T18:32:38.219014362Z","level":"INFO","msg":"logger middleware enabled","component":"middleware/logger"}
+{"time":"2025-02-08T18:32:38.219161647Z","level":"INFO","msg":"Starting http server","op":"server.RunServer","address":":8080"}
+{"time":"2025-02-08T18:32:38.219523308Z","level":"INFO","msg":"grpc server has started","op":"grpc.App","port":5050,"addr":"[::]:5050"}
+{"time":"2025-02-08T18:33:41.997237898Z","level":"INFO","msg":"request completed","component":"middleware/logger","method":"GET","path":"/api/v1/health","remote_addr":"172.18.0.1:60860","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36","request_id":"","status":404,"bytes":27,"duration":"96.764µs"}
+{"time":"2025-02-08T18:39:07.585641401Z","level":"INFO","msg":"Captured signal: ","signal":"terminated"}
+{"time":"2025-02-08T18:39:07.586027792Z","level":"INFO","msg":"gracefully stopping server","op":"grcapp.Stop","port":5050}
+{"time":"2025-02-08T18:39:07.586169624Z","level":"INFO","msg":"gRPC server was stopped","op":"grcapp.Stop"}

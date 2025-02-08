@@ -1,0 +1,46 @@
+services:
+  url-shortener:
+    healthcheck:
+      test: curl --fail http://localhost:8080/api/v1/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    depends_on:
+      storage:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+      - "5050:5050"
+    environment:
+      - SHORTENER_CONFIG=config/docker.yml
+    volumes:
+      - ./logs/url-shortener:/app/logs
+
+  storage:
+    healthcheck:
+      test: pg_isready -U postgres -d postgres
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    image: postgres:15.4-alpine
+    container_name: storage
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  migrator:
+    build:
+      dockerfile: migration/migrator/Dockerfile
+      context: ./
+    depends_on:
+      storage:
+        condition: service_healthy
+    entrypoint: ["sql-migrate", "up", "-config", "migration/migrator/config/dbconfig.yml", "-env=docker"]

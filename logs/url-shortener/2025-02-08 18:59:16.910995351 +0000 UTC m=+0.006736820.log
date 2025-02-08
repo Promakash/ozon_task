@@ -1,0 +1,9 @@
+{"time":"2025-02-08T18:59:16.911059842Z","level":"INFO","msg":"Starting URL Shortener","config":{"HTTPServer":{"Address":":8080","ReadTimeout":5000000000,"WriteTimeout":5000000000,"IdleTimeout":30000000000,"OperationsTimeout":4000000000},"GRPC":{"Port":5050,"OperationsTimeout":5000000000},"PG":{"Host":"storage","Port":5432,"User":"postgres","Password":"password","DBName":"postgres"},"Logger":{"Level":"debug","Format":"json","Directory":"/app/logs"}}}
+{"time":"2025-02-08T18:59:16.911417012Z","level":"INFO","msg":"logger middleware enabled","component":"middleware/logger"}
+{"time":"2025-02-08T18:59:16.91155914Z","level":"INFO","msg":"Starting http server","op":"server.RunServer","address":":8080"}
+{"time":"2025-02-08T18:59:16.985190112Z","level":"INFO","msg":"grpc server has started","op":"grpc.App","port":5050,"addr":"[::]:5050"}
+{"time":"2025-02-08T19:00:24.799732827Z","level":"INFO","msg":"request completed","component":"middleware/logger","method":"GET","path":"/api/v1/health","remote_addr":"172.18.0.1:48058","user_agent":"curl/8.5.0","request_id":"","status":200,"bytes":2,"duration":"11.608µs"}
+{"time":"2025-02-08T19:00:26.039691397Z","level":"INFO","msg":"request completed","component":"middleware/logger","method":"GET","path":"/api/v1/health","remote_addr":"172.18.0.1:37538","user_agent":"curl/8.5.0","request_id":"","status":200,"bytes":2,"duration":"9.349µs"}
+{"time":"2025-02-08T19:02:51.745294613Z","level":"INFO","msg":"Captured signal: ","signal":"terminated"}
+{"time":"2025-02-08T19:02:51.745423974Z","level":"INFO","msg":"gracefully stopping server","op":"grcapp.Stop","port":5050}
+{"time":"2025-02-08T19:02:51.745546349Z","level":"INFO","msg":"gRPC server was stopped","op":"grcapp.Stop"}

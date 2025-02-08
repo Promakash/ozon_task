@@ -5,10 +5,13 @@ go 1.23.4
 require (
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-chi/render v1.0.3
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.2.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/prometheus/client_golang v1.20.5
 	github.com/swaggo/http-swagger v1.3.4
+	github.com/swaggo/swag v1.16.4
+	golang.org/x/sync v0.10.0
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.5
 )
@@ -35,10 +38,8 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
-	github.com/swaggo/swag v1.8.1 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/net v0.32.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect

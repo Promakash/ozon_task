@@ -1,9 +1,9 @@
 docker:
   dialect: postgres
   datasource:
-    host=user_backend_storage
+    host=storage
     dbname=postgres
     user=postgres
     password=password
     sslmode=disable
-  dir: /app/migrations/postgres
+  dir: /app/migration/migrations/postgres

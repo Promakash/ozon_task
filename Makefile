@@ -1,6 +1,10 @@
 PROTO_SRC_DIR := protos/proto
 PROTO_GEN_DIR := protos/gen/go
 
+generate_docs:
+	swag fmt
+	swag init -g cmd/main.go -o docs
+
 lint_code:
 	golangci-lint run
 

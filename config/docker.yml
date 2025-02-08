@@ -1,0 +1,22 @@
+http_server:
+  address: ":8080"
+  read_timeout: 5s
+  write_timeout: 5s
+  idle_timeout: 30s
+  operations_timeout: 4s
+
+grpc:
+  port: 5050
+  operations_timeout: 5s
+
+postgres:
+  host: storage
+  port: 5432
+  user: postgres
+  password: password
+  db_name: postgres
+
+logger:
+  level: debug
+  format: json
+  directory: /app/logs

@@ -9,6 +9,8 @@ import (
 	"syscall"
 )
 
+var ErrOSSignal = errors.New("operating system signal")
+
 func ListenSignal(ctx context.Context, logger *slog.Logger) error {
 	sigquit := make(chan os.Signal, 1)
 	signal.Ignore(syscall.SIGHUP, syscall.SIGPIPE)
@@ -18,6 +20,6 @@ func ListenSignal(ctx context.Context, logger *slog.Logger) error {
 		return nil
 	case sig := <-sigquit:
 		logger.Info("Captured signal: ", slog.String("signal", sig.String()))
-		return errors.New("operating system signal")
+		return ErrOSSignal
 	}
 }
