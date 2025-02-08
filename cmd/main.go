@@ -33,7 +33,8 @@ const (
 )
 
 func main() {
-	cfg := pkgconfig.MustLoad[config.Config](ConfigEnvVar)
+	cfg := config.Config{}
+	pkgconfig.MustLoad(ConfigEnvVar, cfg)
 
 	log, file := pkglog.NewLogger(cfg.Logger)
 	defer func() { _ = file.Close() }()

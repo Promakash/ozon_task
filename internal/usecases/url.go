@@ -5,6 +5,7 @@ import (
 	"ozon_task/domain"
 )
 
+//go:generate go run github.com/vektra/mockery/v2@v2.50 --name=URL --filename=url_service_mock.go
 type URL interface {
 	ShortenURL(ctx context.Context, original domain.URL) (domain.URL, error)
 	ResolveURL(ctx context.Context, shorted domain.URL) (domain.URL, error)

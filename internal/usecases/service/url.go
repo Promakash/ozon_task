@@ -48,6 +48,8 @@ func (s *URLService) ShortenURL(ctx context.Context, original domain.URL) (domai
 	shortened, err := s.repo.GetShortenedURLByOriginal(ctx, original)
 	if err == nil {
 		return shortened, nil
+	} else if ok := errors.Is(err, domain.ErrShortenedNotFound); !ok {
+		return "", err
 	}
 
 	newURL, err := s.generateURL(ctx)
