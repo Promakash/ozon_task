@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,7 +21,7 @@ func NewURLRepository(pool *pgxpool.Pool) repository.URL {
 	}
 }
 
-func (r *URLRepository) PutShortenedURL(ctx context.Context, original domain.URL, shortened *domain.URL) error {
+func (r *URLRepository) PutShortenedURL(ctx context.Context, original domain.URL, shortened *domain.ShortURL) error {
 	var result domain.URL
 
 	query := `
@@ -40,7 +41,7 @@ func (r *URLRepository) PutShortenedURL(ctx context.Context, original domain.URL
 	return err
 }
 
-func (r *URLRepository) GetOriginalURLByShortened(ctx context.Context, shortened domain.URL) (domain.URL, error) {
+func (r *URLRepository) GetOriginalURLByShortened(ctx context.Context, shortened domain.ShortURL) (domain.URL, error) {
 	var original domain.URL
 	query := `
         SELECT original_link FROM links
@@ -52,13 +53,13 @@ func (r *URLRepository) GetOriginalURLByShortened(ctx context.Context, shortened
 		if errors.Is(err, pgx.ErrNoRows) {
 			return "", domain.ErrOriginalNotFound
 		}
-		return "", err
+		return "", fmt.Errorf("GetOriginalURLByShortened: query failed: %w", err)
 	}
 
 	return original, nil
 }
 
-func (r *URLRepository) GetShortenedURLByOriginal(ctx context.Context, original domain.URL) (domain.URL, error) {
+func (r *URLRepository) GetShortenedURLByOriginal(ctx context.Context, original domain.URL) (domain.ShortURL, error) {
 	var shortened domain.URL
 	query := `
         SELECT shortened_link FROM links
@@ -70,7 +71,7 @@ func (r *URLRepository) GetShortenedURLByOriginal(ctx context.Context, original 
 		if errors.Is(err, pgx.ErrNoRows) {
 			return "", domain.ErrShortenedNotFound
 		}
-		return "", err
+		return "", fmt.Errorf("GetShortenedURLByOriginal: query failed: %w", err)
 	}
 
 	return shortened, nil

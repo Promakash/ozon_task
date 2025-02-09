@@ -6,6 +6,7 @@ import (
 )
 
 func TestNewRandomString(t *testing.T) {
+	t.Parallel()
 	alphabet := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 	sizes := []int{1, 5, 10, 15, 20, 25, 30, 35}
 
@@ -26,6 +27,7 @@ func TestNewRandomString(t *testing.T) {
 }
 
 func TestNewRandomString_Collisions(t *testing.T) {
+	t.Parallel()
 	alphabet := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 	size := 10
 	iterations := 1000000
@@ -37,7 +39,7 @@ func TestNewRandomString_Collisions(t *testing.T) {
 			t.Fatalf("Error generating random string: %v", err)
 		}
 		if _, exists := seen[s]; exists {
-			t.Fatalf("Collision detected for string: %s", s)
+			t.Fatalf("Collision detected for string: %s; iteration: %d", s, i)
 		}
 		seen[s] = struct{}{}
 	}

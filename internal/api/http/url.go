@@ -10,6 +10,7 @@ import (
 	"ozon_task/domain"
 	"ozon_task/internal/api/http/types"
 	"ozon_task/internal/usecases"
+	pkgerr "ozon_task/pkg/error"
 	"ozon_task/pkg/http/handlers"
 	resp "ozon_task/pkg/http/responses"
 	pkglog "ozon_task/pkg/log"
@@ -40,18 +41,22 @@ func (h *URLHandler) WithURLHandlers() handlers.RouterOption {
 	}
 }
 
-// @Summary		Create shortened URL
-// @Description	Accepts a JSON payload containing the original URL and returns a generated shortened URL.
-//
-// If a shortened URL for the given original URL already exists, the existing shortened URL is returned.
+// @Summary		Create a shortened URL
+// @Description Accepts a JSON payload containing the original URL and returns a generated shortened URL.
+// @Description
+// @Description The provided `original_url` must be a valid, publicly accessible URL.
+// @Description - If the URL does not include an HTTP scheme (`http://` or `https://`), the service will automatically prepend `https://`.
+// @Description - If the provided URL results in more than **10 redirects**, the response will contain the URL state at the **10th redirect**.
+// @Description
+// @Description If a shortened URL already exists for the given original URL, the existing shortened URL will be returned.
 //
 // @Accept			json
 // @Produce		json
-// @Param			original_url	body		types.PostShortURLRequest	true	"JSON payload with the original URL"
-// @Success		200				{object}	types.PostShortURLResponse	"Shortened URL successfully created or retrieved"
-// @Failure		400				{object}	responses.ErrorResponse		"Bad request"
-// @Failure		408				{object}	responses.ErrorResponse		"Request timeout (e.g. user disconnect or service timeout)"
-// @Failure		500				{object}	responses.ErrorResponse		"Internal server error"
+// @Param			original_url	body		types.PostShortURLRequest	true	"Original URL (must be publicly accessible; if no HTTP scheme is provided, `https://` is added automatically; URLs with more than 10 redirects return the last reachable state)."
+// @Success		200				{object}	types.PostShortURLResponse	"Successfully created or retrieved an existing shortened URL"
+// @Failure		400				{object}	responses.ErrorResponse		"Invalid request: the provided URL is malformed, inaccessible, or empty"
+// @Failure		408				{object}	responses.ErrorResponse		"Request timeout: exceeded server execution time or client disconnected"
+// @Failure		500				{object}	responses.ErrorResponse		"Internal service error"
 // @Router			/urls [post]
 func (h *URLHandler) postShortURL(r *http.Request) resp.Response {
 	const op = "URLHandler.postShortURL"
@@ -77,15 +82,21 @@ func (h *URLHandler) postShortURL(r *http.Request) resp.Response {
 	return h.handleResult(err, shortened)
 }
 
-// @Summary		Retrieve original URL
-// @Description	Given a shortened URL, returns the original URL.
+// @Summary		Retrieve the original URL
+// @Description	Given a shortened URL, returns the corresponding original URL.
+// @Description
+// @Description The `shortened` URL must be exactly **10 characters long** and consist only of:
+// @Description - Uppercase and lowercase English letters (`A-Z, a-z`)
+// @Description - Digits (`0-9`)
+// @Description - Underscore (`_`)
+//
 // @Produce		json
-// @Param			shortened	path		string							true	"Shortened URL (must be exactly 10 characters long and consist only of uppercase and lowercase English letters, digits, and underscore)"
-// @Success		200			{object}	types.GetOriginalURLResponse	"Original URL successfully retrieved"
-// @Failure		400			{object}	responses.ErrorResponse			"Bad request"
-// @Failure		404			{object}	responses.ErrorResponse			"Shortened URL not found"
-// @Failure		408			{object}	responses.ErrorResponse			"Request timeout (e.g. user disconnect or service timeout)"
-// @Failure		500			{object}	responses.ErrorResponse			"Internal server error"
+// @Param			shortened	path		string							true	"Shortened URL (must be 10 characters long and follow the defined character set)"
+// @Success		200			{object}	types.GetOriginalURLResponse	"Successfully retrieved the original URL"
+// @Failure		400			{object}	responses.ErrorResponse			"Invalid format: incorrect length or invalid characters in the shortened URL"
+// @Failure		404			{object}	responses.ErrorResponse			"Shortened URL not found in the system"
+// @Failure		408			{object}	responses.ErrorResponse			"Request timeout: exceeded server execution time or client disconnected"
+// @Failure		500			{object}	responses.ErrorResponse			"Internal service error"
 // @Router			/urls/{shortened} [get]
 func (h *URLHandler) getOriginalURL(r *http.Request) resp.Response {
 	const op = "URLHandler.getOriginalURL"
@@ -112,14 +123,22 @@ func (h *URLHandler) getOriginalURL(r *http.Request) resp.Response {
 }
 
 func (h *URLHandler) handleResult(err error, r any) resp.Response {
-	switch {
-	case err == nil:
+	if err == nil {
 		return resp.OK(r)
-	case errors.Is(err, domain.ErrInvalidShortened) || errors.Is(err, domain.ErrInvalidOriginal):
+	}
+
+	err = pkgerr.UnwrapAll(err)
+
+	switch {
+	case errors.Is(err, domain.ErrInvalidShortened),
+		errors.Is(err, domain.ErrInvalidOriginal),
+		errors.Is(err, domain.ErrInaccessibleOriginal):
 		return resp.BadRequest(err)
-	case errors.Is(err, domain.ErrShortenedNotFound) || errors.Is(err, domain.ErrOriginalNotFound):
+	case errors.Is(err, domain.ErrShortenedNotFound),
+		errors.Is(err, domain.ErrOriginalNotFound):
 		return resp.NotFound(err)
-	case errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled):
+	case errors.Is(err, context.DeadlineExceeded),
+		errors.Is(err, context.Canceled):
 		return resp.RequestTimeout(err)
 	default:
 		return resp.Unknown(err)

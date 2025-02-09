@@ -12,17 +12,17 @@
     "paths": {
         "/urls": {
             "post": {
-                "description": "Accepts a JSON payload containing the original URL and returns a generated shortened URL.",
+                "description": "Accepts a JSON payload containing the original URL and returns a generated shortened URL.\n\nThe provided `original_url` must be a valid, publicly accessible URL.\n- If the URL does not include an HTTP scheme (`http://` or `https://`), the service will automatically prepend `https://`.\n- If the provided URL results in more than **10 redirects**, the response will contain the URL state at the **10th redirect**.\n\nIf a shortened URL already exists for the given original URL, the existing shortened URL will be returned.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Create shortened URL",
+                "summary": "Create a shortened URL",
                 "parameters": [
                     {
-                        "description": "JSON payload with the original URL",
+                        "description": "Original URL (must be publicly accessible; if no HTTP scheme is provided, `https://` is added automatically; URLs with more than 10 redirects return the last reachable state).",
                         "name": "original_url",
                         "in": "body",
                         "required": true,
@@ -33,25 +33,25 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Shortened URL successfully created or retrieved",
+                        "description": "Successfully created or retrieved an existing shortened URL",
                         "schema": {
                             "$ref": "#/definitions/types.PostShortURLResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Invalid request: the provided URL is malformed, inaccessible, or empty",
                         "schema": {
                             "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "408": {
-                        "description": "Request timeout (e.g. user disconnect or service timeout)",
+                        "description": "Request timeout: exceeded server execution time or client disconnected",
                         "schema": {
                             "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal service error",
                         "schema": {
                             "$ref": "#/definitions/responses.ErrorResponse"
                         }
@@ -61,15 +61,15 @@
         },
         "/urls/{shortened}": {
             "get": {
-                "description": "Given a shortened URL, returns the original URL.",
+                "description": "Given a shortened URL, returns the corresponding original URL.\n\nThe `shortened` URL must be exactly **10 characters long** and consist only of:\n- Uppercase and lowercase English letters (`A-Z, a-z`)\n- Digits (`0-9`)\n- Underscore (`_`)",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Retrieve original URL",
+                "summary": "Retrieve the original URL",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Shortened URL (must be exactly 10 characters long and consist only of uppercase and lowercase English letters, digits, and underscore)",
+                        "description": "Shortened URL (must be 10 characters long and follow the defined character set)",
                         "name": "shortened",
                         "in": "path",
                         "required": true
@@ -77,31 +77,31 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Original URL successfully retrieved",
+                        "description": "Successfully retrieved the original URL",
                         "schema": {
                             "$ref": "#/definitions/types.GetOriginalURLResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Invalid format: incorrect length or invalid characters in the shortened URL",
                         "schema": {
                             "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Shortened URL not found",
+                        "description": "Shortened URL not found in the system",
                         "schema": {
                             "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "408": {
-                        "description": "Request timeout (e.g. user disconnect or service timeout)",
+                        "description": "Request timeout: exceeded server execution time or client disconnected",
                         "schema": {
                             "$ref": "#/definitions/responses.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal service error",
                         "schema": {
                             "$ref": "#/definitions/responses.ErrorResponse"
                         }

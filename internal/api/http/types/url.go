@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"ozon_task/domain"
@@ -13,31 +14,34 @@ type PostShortURLRequest struct {
 
 func CreatePostShorURLRequest(r *http.Request) (*PostShortURLRequest, error) {
 	req := &PostShortURLRequest{}
+
 	if err := handlers.DecodeRequest(r, req); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("CreatePostShorURLRequest: error while unpacking json: %w", domain.ErrInvalidOriginal)
 	}
 
-	if ok := domain.IsValidOriginalURL(req.OriginalURL); !ok {
-		return nil, domain.ErrInvalidOriginal
+	req.OriginalURL = domain.NormalizeURL(req.OriginalURL)
+
+	if ok, err := domain.IsValidOriginalURL(req.OriginalURL); !ok {
+		return nil, fmt.Errorf("CreatePostShorURLRequest: error while validating url: %w", err)
 	}
 
 	return req, nil
 }
 
 type PostShortURLResponse struct {
-	ShortenedURL domain.URL `json:"shortened_url"`
+	ShortenedURL domain.ShortURL `json:"shortened_url"`
 }
 
 type GetOriginalURLRequest struct {
-	ShortenedURL domain.URL
+	ShortenedURL domain.ShortURL
 }
 
 func CreateGetOriginalURLRequest(r *http.Request) (*GetOriginalURLRequest, error) {
 	const queryParamName = "shortened"
 	url := chi.URLParam(r, queryParamName)
 
-	if ok := domain.IsValidShortenedURL(url); !ok {
-		return nil, domain.ErrInvalidShortened
+	if ok, err := domain.IsValidShortenedURL(url); !ok {
+		return nil, fmt.Errorf("CreateGetOriginalURLRequest: error while validating url: %w", err)
 	}
 
 	return &GetOriginalURLRequest{ShortenedURL: url}, nil

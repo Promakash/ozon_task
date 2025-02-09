@@ -9,10 +9,10 @@ import (
 	"google.golang.org/grpc/status"
 	"log/slog"
 	"net"
+	"ozon_task/internal/config"
 	"ozon_task/internal/grpc/url_shortener"
 	"ozon_task/internal/usecases"
 	pkggrpc "ozon_task/pkg/grpc"
-	"time"
 )
 
 type App struct {
@@ -24,8 +24,7 @@ type App struct {
 func New(
 	log *slog.Logger,
 	service usecases.URL,
-	port int,
-	responseTimeout time.Duration,
+	cfg config.GRPCConfig,
 ) *App {
 	loggingOpts := []logging.Option{
 		logging.WithLogOnEvents(
@@ -49,14 +48,14 @@ func New(
 	url_shortener.Register(
 		gRPCServer,
 		service,
-		responseTimeout,
+		cfg.OperationsTimeout,
 		log,
 	)
 
 	return &App{
 		log:        log,
 		gRPCServer: gRPCServer,
-		port:       port,
+		port:       cfg.Port,
 	}
 }
 
@@ -65,6 +64,7 @@ func (a *App) MustRun() {
 		panic(err)
 	}
 }
+
 func (a *App) Run() error {
 	const op = "grpc.App"
 
@@ -80,7 +80,7 @@ func (a *App) Run() error {
 
 	log.Info("grpc server has started", slog.String("addr", l.Addr().String()))
 
-	if err := a.gRPCServer.Serve(l); err != nil {
+	if err = a.gRPCServer.Serve(l); err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 

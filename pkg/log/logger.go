@@ -9,8 +9,8 @@ import (
 )
 
 type Config struct {
-	Level     string `yaml:"level"`
-	Format    string `yaml:"format"`
+	Level     string `yaml:"level" env-default:"info"`
+	Format    string `yaml:"format" env-default:"text"`
 	Directory string `yaml:"directory"`
 }
 

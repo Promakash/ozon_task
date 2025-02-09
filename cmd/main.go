@@ -6,17 +6,16 @@ import (
 	"golang.org/x/sync/errgroup"
 	"log/slog"
 	_ "ozon_task/docs"
-	"ozon_task/internal/api/http"
 	grpcapp "ozon_task/internal/app/grpc"
+	httpapp "ozon_task/internal/app/http"
 	"ozon_task/internal/config"
 	"ozon_task/internal/repository/postgres"
 	"ozon_task/internal/usecases/service"
 	pkgconfig "ozon_task/pkg/config"
-	"ozon_task/pkg/http/handlers"
-	"ozon_task/pkg/http/server"
 	"ozon_task/pkg/infra"
 	pkglog "ozon_task/pkg/log"
 	"ozon_task/pkg/shutdown"
+	"time"
 )
 
 //	@title			URL Shortener API
@@ -34,7 +33,7 @@ const (
 
 func main() {
 	cfg := config.Config{}
-	pkgconfig.MustLoad(ConfigEnvVar, cfg)
+	pkgconfig.MustLoad(ConfigEnvVar, &cfg)
 
 	log, file := pkglog.NewLogger(cfg.Logger)
 	defer func() { _ = file.Close() }()
@@ -48,26 +47,10 @@ func main() {
 	defer dbPool.Close()
 	urlRepo := postgres.NewURLRepository(dbPool)
 
-	urlService := service.NewURLService(log, urlRepo)
+	urlService := service.NewURLService(urlRepo)
 
-	grpcApp := grpcapp.New(log, urlService, cfg.GRPC.Port, cfg.GRPC.OperationsTimeout)
-
-	urlHandler := http.NewURLHandler(
-		log,
-		urlService,
-		cfg.HTTPServer.OperationsTimeout,
-	)
-	publicHandler := handlers.NewHandler(
-		APIPath,
-		handlers.WithLogging(log),
-		handlers.WithProfilerHandlers(),
-		handlers.WithRequestID(),
-		handlers.WithRecover(),
-		handlers.WithSwagger(),
-		handlers.WithHealthHandler(),
-		handlers.WithErrHandlers(),
-		urlHandler.WithURLHandlers(),
-	)
+	grpcApp := grpcapp.New(log, urlService, cfg.GRPC)
+	httpApp := httpapp.New(log, APIPath, urlService, cfg.HTTPServer)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
@@ -75,11 +58,7 @@ func main() {
 	})
 
 	g.Go(func() error {
-		return server.RunServer(ctx, cfg.HTTPServer.Address,
-			publicHandler,
-			cfg.HTTPServer.WriteTimeout,
-			cfg.HTTPServer.ReadTimeout,
-			cfg.HTTPServer.IdleTimeout)
+		return httpApp.Run()
 	})
 
 	g.Go(func() error {
@@ -88,8 +67,12 @@ func main() {
 
 	g.Go(func() error {
 		<-ctx.Done()
+		log.Info("Shutdown signal received, stopping servers")
 		grpcApp.Stop()
-		return nil
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		return httpApp.Stop(shutdownCtx)
 	})
 
 	err = g.Wait()

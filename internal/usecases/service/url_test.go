@@ -5,18 +5,16 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"log/slog"
 	"ozon_task/domain"
 	"ozon_task/internal/repository/mocks"
 	"testing"
 	"time"
 )
 
-var loggerStub = slog.New(slog.NewTextHandler(nil, nil))
-
 func TestShortenURL_NewURL(t *testing.T) {
+	t.Parallel()
 	mockRepo := new(mocks.URL)
-	svc := NewURLService(loggerStub, mockRepo)
+	svc := NewURLService(mockRepo)
 
 	ctx := context.Background()
 	originalURL := "https://finance.ozon.ru"
@@ -33,8 +31,9 @@ func TestShortenURL_NewURL(t *testing.T) {
 }
 
 func TestShortenURL_ExistedURL(t *testing.T) {
+	t.Parallel()
 	mockRepo := new(mocks.URL)
-	svc := NewURLService(loggerStub, mockRepo)
+	svc := NewURLService(mockRepo)
 
 	ctx := context.Background()
 	originalURL := "https://finance.ozon.ru"
@@ -51,8 +50,9 @@ func TestShortenURL_ExistedURL(t *testing.T) {
 }
 
 func TestShortenURL_RetryOnCollision(t *testing.T) {
+	t.Parallel()
 	mockRepo := new(mocks.URL)
-	svc := NewURLService(loggerStub, mockRepo)
+	svc := NewURLService(mockRepo)
 
 	ctx := context.Background()
 	originalURL := "https://finance.ozon.ru"
@@ -71,10 +71,11 @@ func TestShortenURL_RetryOnCollision(t *testing.T) {
 }
 
 func TestShortenURL_ContextTimeout(t *testing.T) {
+	t.Parallel()
 	const operationTimeout = time.Second * 5
 
 	mockRepo := new(mocks.URL)
-	svc := NewURLService(loggerStub, mockRepo)
+	svc := NewURLService(mockRepo)
 
 	ctx, cancel := context.WithTimeout(context.Background(), operationTimeout)
 	defer cancel()
@@ -90,8 +91,9 @@ func TestShortenURL_ContextTimeout(t *testing.T) {
 }
 
 func TestShortenURL_UnexpectedDBError(t *testing.T) {
+	t.Parallel()
 	mockRepo := new(mocks.URL)
-	svc := NewURLService(loggerStub, mockRepo)
+	svc := NewURLService(mockRepo)
 
 	ctx := context.Background()
 	originalURL := "https://finance.ozon.ru"
@@ -107,8 +109,9 @@ func TestShortenURL_UnexpectedDBError(t *testing.T) {
 }
 
 func TestResolveURL_ExistedURL(t *testing.T) {
+	t.Parallel()
 	mockRepo := new(mocks.URL)
-	svc := NewURLService(loggerStub, mockRepo)
+	svc := NewURLService(mockRepo)
 
 	ctx := context.Background()
 	shortenedURL := "abc123"
@@ -125,8 +128,9 @@ func TestResolveURL_ExistedURL(t *testing.T) {
 }
 
 func TestResolveURL_NotFound(t *testing.T) {
+	t.Parallel()
 	mockRepo := new(mocks.URL)
-	svc := NewURLService(loggerStub, mockRepo)
+	svc := NewURLService(mockRepo)
 
 	ctx := context.Background()
 	shortenedURL := "abc123"
@@ -137,7 +141,7 @@ func TestResolveURL_NotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Empty(t, result)
-	assert.Equal(t, domain.ErrOriginalNotFound, err)
+	assert.Equal(t, true, errors.Is(err, domain.ErrOriginalNotFound))
 
 	mockRepo.AssertExpectations(t)
 }

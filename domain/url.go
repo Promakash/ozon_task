@@ -6,3 +6,4 @@ const (
 )
 
 type URL = string
+type ShortURL = string
