@@ -17,7 +17,7 @@ type App struct {
 
 func New(
 	log *slog.Logger,
-	APIPath string,
+	apiPath string,
 	service usecases.URL,
 	cfg config.HTTPConfig,
 ) *App {
@@ -28,7 +28,7 @@ func New(
 	)
 
 	publicHandler := handlers.NewHandler(
-		APIPath,
+		apiPath,
 		handlers.WithLogging(log),
 		handlers.WithProfilerHandlers(),
 		handlers.WithRequestID(),

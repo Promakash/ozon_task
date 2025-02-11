@@ -1,4 +1,4 @@
-package grpc
+package tests
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -13,28 +13,16 @@ import (
 
 func TestShortenURL_SuccessURLs(t *testing.T) {
 	t.Parallel()
-	ctx, st := suite.New(t)
+	ctx, st := suite.NewGRPCSuite(t)
 
 	tests := []struct {
 		name           string
 		url            domain.URL
 		expectedStatus codes.Code
 	}{
-		{
-			name:           "Fully valid url",
-			url:            "https://finance.ozon.ru/",
-			expectedStatus: codes.OK,
-		},
-		{
-			name:           "Insecure HTTP scheme",
-			url:            "http://finance.ozon.ru/",
-			expectedStatus: codes.OK,
-		},
-		{
-			name:           "No HTTP Scheme",
-			url:            "finance.ozon.ru",
-			expectedStatus: codes.OK,
-		},
+		{name: "Fully valid url", url: "https://finance.ozon.ru/", expectedStatus: codes.OK},
+		{name: "Insecure HTTP scheme", url: "http://finance.ozon.ru/", expectedStatus: codes.OK},
+		{name: "No HTTP Scheme", url: "finance.ozon.ru", expectedStatus: codes.OK},
 	}
 
 	for _, test := range tests {
@@ -43,9 +31,6 @@ func TestShortenURL_SuccessURLs(t *testing.T) {
 		})
 		code, _ := status.FromError(err)
 
-		if err != nil {
-			t.Fatalf("error: %v", err)
-		}
 		assert.NoError(t, err)
 		assert.Equal(t, test.expectedStatus, code.Code())
 		assert.NotEmpty(t, res.GetShortenedUrl())
@@ -56,7 +41,7 @@ func TestShortenURL_SameURL(t *testing.T) {
 	t.Parallel()
 	const validURL = "https://finance.ozon.ru/business/rko"
 
-	ctx, st := suite.New(t)
+	ctx, st := suite.NewGRPCSuite(t)
 
 	res, err := st.URLClient.ShortenURL(ctx, &urlshortenerv1.ShortenURLRequest{
 		OriginalUrl: validURL,
@@ -77,38 +62,18 @@ func TestShortenURL_SameURL(t *testing.T) {
 
 func TestShortenURL_InvalidURLs(t *testing.T) {
 	t.Parallel()
-	ctx, st := suite.New(t)
+	ctx, st := suite.NewGRPCSuite(t)
 
 	tests := []struct {
 		name           string
 		url            domain.URL
 		expectedStatus codes.Code
 	}{
-		{
-			name:           "No top level domain",
-			url:            "https://ozon",
-			expectedStatus: codes.InvalidArgument,
-		},
-		{
-			name:           "Empty URL",
-			url:            "",
-			expectedStatus: codes.InvalidArgument,
-		},
-		{
-			name:           "No host no top level domain",
-			url:            "https://",
-			expectedStatus: codes.InvalidArgument,
-		},
-		{
-			name:           "No host",
-			url:            "https://.ru",
-			expectedStatus: codes.InvalidArgument,
-		},
-		{
-			name:           "Whitespace in host",
-			url:            "https://oz on.ru",
-			expectedStatus: codes.InvalidArgument,
-		},
+		{name: "No top level domain", url: "https://ozon", expectedStatus: codes.InvalidArgument},
+		{name: "Empty URL", url: "", expectedStatus: codes.InvalidArgument},
+		{name: "No host no top level domain", url: "https://", expectedStatus: codes.InvalidArgument},
+		{name: "No host", url: "https://.ru", expectedStatus: codes.InvalidArgument},
+		{name: "Whitespace in host", url: "https://oz on.ru", expectedStatus: codes.InvalidArgument},
 	}
 
 	for _, test := range tests {
@@ -126,7 +91,7 @@ func TestResolveURL_Success(t *testing.T) {
 	t.Parallel()
 	const validURL = "https://finance.ozon.ru/business/acquiring"
 
-	ctx, st := suite.New(t)
+	ctx, st := suite.NewGRPCSuite(t)
 
 	res, err := st.URLClient.ShortenURL(ctx, &urlshortenerv1.ShortenURLRequest{
 		OriginalUrl: validURL,
@@ -149,28 +114,16 @@ func TestResolveURL_Success(t *testing.T) {
 
 func TestShortenURL_InvalidShorts(t *testing.T) {
 	t.Parallel()
-	ctx, st := suite.New(t)
+	ctx, st := suite.NewGRPCSuite(t)
 
 	tests := []struct {
 		name           string
 		url            domain.ShortURL
 		expectedStatus codes.Code
 	}{
-		{
-			name:           "Invalid length",
-			url:            "xZsyc_xvo11",
-			expectedStatus: codes.InvalidArgument,
-		},
-		{
-			name:           "Empty URL",
-			url:            "",
-			expectedStatus: codes.InvalidArgument,
-		},
-		{
-			name:           "Invalid symbol",
-			url:            "@fcizawmtN",
-			expectedStatus: codes.InvalidArgument,
-		},
+		{name: "Invalid length", url: "xZsyc_xvo11", expectedStatus: codes.InvalidArgument},
+		{name: "Empty URL", url: "", expectedStatus: codes.InvalidArgument},
+		{name: "Invalid symbol", url: "@fcizawmtN", expectedStatus: codes.InvalidArgument},
 	}
 
 	for _, test := range tests {
@@ -189,7 +142,7 @@ func TestShortenURL_NotFound(t *testing.T) {
 	validShort, err := random.NewRandomString(domain.ShortenedURLSize, domain.AllowedSymbols)
 	assert.NoError(t, err)
 
-	ctx, st := suite.New(t)
+	ctx, st := suite.NewGRPCSuite(t)
 
 	_, err = st.URLClient.ResolveURL(ctx, &urlshortenerv1.ResolveURLRequest{
 		ShortenedUrl: validShort,

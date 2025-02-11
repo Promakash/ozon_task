@@ -33,7 +33,7 @@ type PostShortURLResponse struct {
 }
 
 type GetOriginalURLRequest struct {
-	ShortenedURL domain.ShortURL
+	ShortenedURL domain.ShortURL `json:"shortened_url"`
 }
 
 func CreateGetOriginalURLRequest(r *http.Request) (*GetOriginalURLRequest, error) {
@@ -48,5 +48,5 @@ func CreateGetOriginalURLRequest(r *http.Request) (*GetOriginalURLRequest, error
 }
 
 type GetOriginalURLResponse struct {
-	OriginalURL domain.URL
+	OriginalURL domain.URL `json:"original_url"`
 }

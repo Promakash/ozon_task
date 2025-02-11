@@ -47,7 +47,7 @@ func NewRedisService(client *redis.Client, logger *slog.Logger) cache.Cache {
 	}
 }
 
-func (r *Redis) Set(ctx context.Context, key string, value interface{}, TTL time.Duration) error {
+func (r *Redis) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error {
 	const op = "Redis.Set"
 	log := r.logger.With(
 		slog.String("op", op),
@@ -59,7 +59,7 @@ func (r *Redis) Set(ctx context.Context, key string, value interface{}, TTL time
 		return err
 	}
 
-	err = r.client.Set(ctx, key, bytes, TTL).Err()
+	err = r.client.Set(ctx, key, bytes, ttl).Err()
 	if err != nil {
 		log.Error("error while setting new data", pkglog.Err(err))
 		return err

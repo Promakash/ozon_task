@@ -8,4 +8,4 @@ RUN go mod download
 
 COPY . .
 
-CMD ["go", "test", "./tests/grpc/grpc_test.go", "-v"]
+CMD ["go", "test", "-v", "./tests"]

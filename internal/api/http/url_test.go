@@ -28,7 +28,7 @@ import (
 var dummyLogger = slog.New(slog.NewTextHandler(io.Discard, nil))
 
 const responseTimeout = 5 * time.Second
-const getPath = "/urls/"
+const getPath = "api/v1/urls/"
 const getOriginalQueryParam = "shortened"
 
 func createJSONHandlerRequest(method, path string, payload interface{}) (*http.Request, error) {
@@ -134,13 +134,12 @@ func TestPostShortURL_InsecureHTTPScheme(t *testing.T) {
 	t.Parallel()
 	mockService := new(mocks.URL)
 	originalURL := "http://ozon.ru"
-	changedURL := "https://ozon.ru"
 
 	shortURL, err := random.NewRandomString(domain.ShortenedURLSize, domain.AllowedSymbols)
 	assert.NoError(t, err)
 
 	mockService.
-		On("ShortenURL", mock.Anything, changedURL).
+		On("ShortenURL", mock.Anything, originalURL).
 		Return(shortURL, nil)
 
 	handler := NewURLHandler(dummyLogger, mockService, responseTimeout)

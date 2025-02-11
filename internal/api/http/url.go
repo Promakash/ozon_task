@@ -78,7 +78,7 @@ func (h *URLHandler) postShortURL(r *http.Request) resp.Response {
 		log.Error("failed to generate shortened url", pkglog.Err(err))
 	}
 
-	return h.handleResult(err, shortened)
+	return h.handleResult(err, &types.PostShortURLResponse{ShortenedURL: shortened})
 }
 
 // @Summary		Retrieve the original URL
@@ -118,7 +118,7 @@ func (h *URLHandler) getOriginalURL(r *http.Request) resp.Response {
 		log.Error("failed to get original url", pkglog.Err(err))
 	}
 
-	return h.handleResult(err, original)
+	return h.handleResult(err, &types.GetOriginalURLResponse{OriginalURL: original})
 }
 
 func (h *URLHandler) handleResult(err error, r any) resp.Response {

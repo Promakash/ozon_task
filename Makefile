@@ -12,6 +12,9 @@ stop:
 
 build_and_run: build run
 
+run_tests:
+	docker compose --profile test up -d
+
 generate_docs:
 	swag fmt
 	swag init -g cmd/main.go -o docs

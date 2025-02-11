@@ -32,7 +32,7 @@ func NewURLRepository(pool *pgxpool.Pool, cache cache.Cache, cacheTTL, cacheWrit
 func (r *URLRepository) CreateOrGetShortenedURL(ctx context.Context, original domain.URL, shortened domain.ShortURL) (domain.ShortURL, error) {
 	var result domain.URL
 
-	//used update on in case of concurrent inserting
+	// used update on in case of concurrent inserting
 	query := `
         INSERT INTO links (original_link, shortened_link)
 		VALUES ($1, $2)
@@ -96,7 +96,7 @@ func (r *URLRepository) GetShortenedURLByOriginal(ctx context.Context, original 
 }
 
 func (r *URLRepository) cacheURLs(original domain.URL, shortened domain.ShortURL) {
-	//r.cacheWriteTimeout*2 because we have two write operations
+	// r.cacheWriteTimeout*2 because we have two write operations
 	ctx, cancel := context.WithTimeout(context.Background(), r.cacheWriteTimeout*2)
 	defer cancel()
 	_ = r.cache.Set(ctx, original, shortened, r.cacheTTL)

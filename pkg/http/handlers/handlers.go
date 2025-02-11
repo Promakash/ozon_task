@@ -5,7 +5,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"log/slog"
 	"net/http"
@@ -114,11 +113,5 @@ func WithProfilerHandlers() RouterOption {
 func WithRequestID() RouterOption {
 	return func(r chi.Router) {
 		r.Use(middleware.RequestID)
-	}
-}
-
-func WithMetricsHandler() RouterOption {
-	return func(r chi.Router) {
-		r.Mount("/metrics", promhttp.Handler())
 	}
 }

@@ -22,9 +22,9 @@ type gRPCServerAPI struct {
 	logger            *slog.Logger
 }
 
-func Register(gRPC *grpc.Server, URL usecases.URL, operationsTimeout time.Duration, logger *slog.Logger) {
+func Register(gRPC *grpc.Server, service usecases.URL, operationsTimeout time.Duration, logger *slog.Logger) {
 	urlshortenerv1.RegisterURLShortenerServer(gRPC, &gRPCServerAPI{
-		service:           URL,
+		service:           service,
 		operationsTimeout: operationsTimeout,
 		logger:            logger,
 	})

@@ -20,7 +20,7 @@ services:
       - SHORTENER_CONFIG=config/docker.yml
     volumes:
       - ./logs/url-shortener:/app/logs
-    entrypoint: ["./shortener-app"]
+    entrypoint: ["./shortener-app", "-redis"]
 
   storage:
     healthcheck:
@@ -59,14 +59,15 @@ services:
         condition: service_healthy
     entrypoint: ["sql-migrate", "up", "-config", "migration/migrator/config/dbconfig.yml", "-env=docker"]
 
-  grpc_tests:
+  tests:
     build:
-      dockerfile: tests/grpc/Dockerfile
+      dockerfile: tests/Dockerfile
       context: ./
     depends_on:
       url-shortener:
         condition: service_healthy
     environment:
       - GRPC_HOST=url-shortener:5050
+      - HTTP_HOST=url-shortener:8080
     profiles:
       - test

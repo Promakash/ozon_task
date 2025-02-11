@@ -39,9 +39,9 @@ const (
 	APIPath      = "/api/v1"
 )
 
-// flags
-// -inmem - use inmemory storage instead of postgresql
-// -redis - use redis as cache (works only if inmem disabled and redis is live)
+// flags.
+// -inmem - use inmemory storage instead of postgresql.
+// -redis - use redis as cache (works only if inmem disabled and redis is live).
 func main() {
 	flags := config.ParseFlags()
 	cfg := config.Config{}

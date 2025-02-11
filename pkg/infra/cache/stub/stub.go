@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var NotImplemented = errors.New("not implemented")
+var ErrNotImplemented = errors.New("not implemented")
 
 type Stub struct{}
 
@@ -15,14 +15,14 @@ func NewStub() cache.Cache {
 	return &Stub{}
 }
 
-func (s *Stub) Set(ctx context.Context, key string, value interface{}, TTL time.Duration) error {
-	return NotImplemented
+func (s *Stub) Set(_ context.Context, key string, value interface{}, TTL time.Duration) error {
+	return ErrNotImplemented
 }
 
-func (s *Stub) Get(ctx context.Context, key string, value interface{}) error {
-	return NotImplemented
+func (s *Stub) Get(_ context.Context, key string, value interface{}) error {
+	return ErrNotImplemented
 }
 
-func (s *Stub) Delete(ctx context.Context, keys ...string) error {
-	return NotImplemented
+func (s *Stub) Delete(_ context.Context, keys ...string) error {
+	return ErrNotImplemented
 }

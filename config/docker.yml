@@ -20,7 +20,7 @@ redis:
   host: cache
   port: 6379
   password: redis
-  TTL: 120s
+  TTL: 1h
   write_timeout: 3s
   ReadTimeout: 400ms
 
