@@ -44,9 +44,8 @@ func (h *URLHandler) WithURLHandlers() handlers.RouterOption {
 // @Summary		Create a shortened URL
 // @Description Accepts a JSON payload containing the original URL and returns a generated shortened URL.
 // @Description
-// @Description The provided `original_url` must be a valid, publicly accessible URL.
+// @Description The provided `original_url` must be a valid URL with top level domain
 // @Description - If the URL does not include an HTTP scheme (`http://` or `https://`), the service will automatically prepend `https://`.
-// @Description - If the provided URL results in more than **1 redirect**, the response will contain the URL state at the **1st redirect**.
 // @Description
 // @Description If a shortened URL already exists for the given original URL, the existing shortened URL will be returned.
 //
@@ -54,7 +53,7 @@ func (h *URLHandler) WithURLHandlers() handlers.RouterOption {
 // @Produce		json
 // @Param			original_url	body		types.PostShortURLRequest	true	"Original URL (must be publicly accessible; if no HTTP scheme is provided, `https://` is added automatically; URLs with more than 10 redirects return the last reachable state)."
 // @Success		200				{object}	types.PostShortURLResponse	"Successfully created or retrieved an existing shortened URL"
-// @Failure		400				{object}	responses.ErrorResponse		"Invalid request: the provided URL is malformed, inaccessible, or empty"
+// @Failure		400				{object}	responses.ErrorResponse		"Invalid request: the provided URL is malformed, or empty"
 // @Failure		408				{object}	responses.ErrorResponse		"Request timeout: exceeded server execution time or client disconnected"
 // @Failure		500				{object}	responses.ErrorResponse		"Internal service error"
 // @Router			/urls [post]
@@ -131,8 +130,7 @@ func (h *URLHandler) handleResult(err error, r any) resp.Response {
 
 	switch {
 	case errors.Is(err, domain.ErrInvalidShortened),
-		errors.Is(err, domain.ErrInvalidOriginal),
-		errors.Is(err, domain.ErrInaccessibleOriginal):
+		errors.Is(err, domain.ErrInvalidOriginal):
 		return resp.BadRequest(err)
 	case errors.Is(err, domain.ErrShortenedNotFound),
 		errors.Is(err, domain.ErrOriginalNotFound):

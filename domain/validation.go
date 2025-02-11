@@ -2,51 +2,34 @@ package domain
 
 import (
 	"fmt"
-	"net/http"
+	"net/url"
 	"strings"
-	"time"
 )
 
-var disallowedCodes = map[int]struct{}{
-	http.StatusNotFound:   {},
-	http.StatusGone:       {},
-	http.StatusBadRequest: {},
+func NormalizeURL(url URL) URL {
+	const prefixSecured = "https://"
+	const prefixInsecure = "http://"
+
+	if len(url) != 0 && !strings.HasPrefix(url, prefixInsecure) && !strings.HasPrefix(url, prefixSecured) {
+		url = fmt.Sprintf("%s%s", prefixSecured, url)
+	}
+
+	return url
 }
 
-func IsValidOriginalURL(urlStr URL) (bool, error) {
-	if len(urlStr) == 0 {
+func IsValidOriginalURL(original URL) (bool, error) {
+	if len(original) == 0 {
 		return false, fmt.Errorf("IsValidOriginalURL: empty string: %w", ErrInvalidOriginal)
 	}
 
-	//HEAD used because it gets only headers, not all content from page
-	req, err := http.NewRequest("HEAD", urlStr, nil)
-	if err != nil {
-		return false, fmt.Errorf("IsValidOriginalURL: error creating request: %w", ErrInvalidOriginal)
+	rawURL, err := url.ParseRequestURI(original)
+	if err != nil || len(rawURL.Host) == 0 {
+		return false, fmt.Errorf("IsValidOriginalURL: invalid format: %w", ErrInvalidOriginal)
 	}
 
-	//if Link is valid doesn't matter where it redirects
-	client := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= 1 {
-				return http.ErrUseLastResponse
-			}
-			return nil
-		},
-		Timeout: 5 * time.Second,
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return false, fmt.Errorf("IsValidOriginalURL: error while making HTTP request: %w", ErrInaccessibleOriginal)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode >= 500 {
-		return false, fmt.Errorf("IsValidOriginalURL: got server side error %d: %w", resp.StatusCode, ErrInaccessibleOriginal)
-	}
-
-	if _, ok := disallowedCodes[resp.StatusCode]; ok {
-		return false, fmt.Errorf("IsValidOriginalURL: got disallowedCode %d: %w", resp.StatusCode, ErrInaccessibleOriginal)
+	// idx must be < 1 because Request can be https://.ru
+	if idx := strings.LastIndex(rawURL.Host, "."); idx < 1 {
+		return false, fmt.Errorf("IsValidOriginalURL: no top level domain found: %w", ErrInvalidOriginal)
 	}
 
 	return true, nil
@@ -66,17 +49,4 @@ func IsValidShortenedURL(url ShortURL) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func NormalizeURL(url URL) URL {
-	const prefix = "https://"
-
-	if len(url) != 0 && !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		url = fmt.Sprintf("%s%s", prefix, url)
-	} else if strings.HasPrefix(url, "http://") {
-		trimmed := strings.TrimPrefix(url, "http://")
-		url = fmt.Sprintf("%s%s", prefix, trimmed)
-	}
-
-	return url
 }

@@ -35,9 +35,8 @@ paths:
       description: |-
         Accepts a JSON payload containing the original URL and returns a generated shortened URL.
 
-        The provided `original_url` must be a valid, publicly accessible URL.
+        The provided `original_url` must be a valid URL with top level domain
         - If the URL does not include an HTTP scheme (`http://` or `https://`), the service will automatically prepend `https://`.
-        - If the provided URL results in more than **1 redirect**, the response will contain the URL state at the **1st redirect**.
 
         If a shortened URL already exists for the given original URL, the existing shortened URL will be returned.
       parameters:
@@ -57,8 +56,7 @@ paths:
           schema:
             $ref: '#/definitions/types.PostShortURLResponse'
         "400":
-          description: 'Invalid request: the provided URL is malformed, inaccessible,
-            or empty'
+          description: 'Invalid request: the provided URL is malformed, or empty'
           schema:
             $ref: '#/definitions/responses.ErrorResponse'
         "408":

@@ -99,8 +99,7 @@ func (s *gRPCServerAPI) handleError(err error) error {
 	case errors.Is(err, domain.ErrOriginalNotFound),
 		errors.Is(err, domain.ErrShortenedNotFound):
 		return status.Error(codes.NotFound, err.Error())
-	case errors.Is(err, domain.ErrInaccessibleOriginal),
-		errors.Is(err, domain.ErrInvalidOriginal),
+	case errors.Is(err, domain.ErrInvalidOriginal),
 		errors.Is(err, domain.ErrInvalidShortened):
 		return status.Error(codes.InvalidArgument, err.Error())
 	default:

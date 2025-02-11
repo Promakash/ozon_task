@@ -58,3 +58,15 @@ services:
       storage:
         condition: service_healthy
     entrypoint: ["sql-migrate", "up", "-config", "migration/migrator/config/dbconfig.yml", "-env=docker"]
+
+  grpc_tests:
+    build:
+      dockerfile: tests/grpc/Dockerfile
+      context: ./
+    depends_on:
+      url-shortener:
+        condition: service_healthy
+    environment:
+      - GRPC_HOST=url-shortener:5050
+    profiles:
+      - test

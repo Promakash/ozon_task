@@ -4,14 +4,16 @@ import (
 	"context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"os"
 	"ozon_task/internal/config"
-	pkgconfig "ozon_task/pkg/config"
 	urlshortenerv1 "ozon_task/protos/gen/go"
 	"testing"
+	"time"
 )
 
-const configEnvVar = "SHORTENER_CONFIG"
-const gRPCHost = "localhost:5050"
+const hostEnvVar = "GRPC_HOST"
+
+var gRPCHost = os.Getenv(hostEnvVar)
 
 type Suite struct {
 	*testing.T
@@ -23,10 +25,9 @@ func New(t *testing.T) (context.Context, *Suite) {
 	t.Helper()
 	t.Parallel()
 
-	cfg := config.Config{}
-	pkgconfig.MustLoad(configEnvVar, &cfg)
+	const OperationsTimeout = time.Second * 10
 
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.GRPC.OperationsTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), OperationsTimeout)
 
 	t.Cleanup(func() {
 		t.Helper()
@@ -43,7 +44,6 @@ func New(t *testing.T) (context.Context, *Suite) {
 
 	return ctx, &Suite{
 		T:         t,
-		Cfg:       &cfg,
 		URLClient: urlshortenerv1.NewURLShortenerClient(cc),
 	}
 }
