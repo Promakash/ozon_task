@@ -13,7 +13,7 @@ stop:
 build_and_run: build run
 
 run_tests:
-	docker compose --profile test up -d
+	docker compose run tests
 
 generate_docs:
 	swag fmt
