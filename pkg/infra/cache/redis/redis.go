@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"log/slog"
 	"ozon_task/pkg/infra/cache"
 	pkglog "ozon_task/pkg/log"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 const CacheAlwaysAlive = redis.KeepTTL

@@ -2,10 +2,11 @@ package types
 
 import (
 	"fmt"
-	"github.com/go-chi/chi/v5"
 	"net/http"
 	"ozon_task/domain"
 	"ozon_task/pkg/http/handlers"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type PostShortURLRequest struct {

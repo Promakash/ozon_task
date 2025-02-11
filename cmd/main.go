@@ -3,9 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
-	"golang.org/x/sync/errgroup"
 	"log/slog"
 	_ "ozon_task/docs"
 	grpcapp "ozon_task/internal/app/grpc"
@@ -24,6 +21,10 @@ import (
 	"ozon_task/pkg/shutdown"
 	"runtime"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
+	"golang.org/x/sync/errgroup"
 )
 
 //	@title			URL Shortener API
@@ -39,9 +40,9 @@ const (
 	APIPath      = "/api/v1"
 )
 
-// flags.
-// -inmem - use inmemory storage instead of postgresql.
-// -redis - use redis as cache (works only if inmem disabled and redis is live).
+// flags
+// -inmem - use inmemory storage instead of postgresql
+// -redis - use redis as cache (works only if inmem disabled and redis is live)
 func main() {
 	flags := config.ParseFlags()
 	cfg := config.Config{}
@@ -85,7 +86,7 @@ func main() {
 	}
 
 	if redisClient != nil {
-		_ = redisClient.Close()
+		pkgredis.ShutdownClient(redisClient)
 	}
 
 	if err != nil && !errors.Is(err, shutdown.ErrOSSignal) {
@@ -93,8 +94,11 @@ func main() {
 	}
 }
 
-// initStorage inits repository depend on flags
-func initStorage(flags config.AppFlags, cfg config.Config, log *slog.Logger) (repository.URL, *pgxpool.Pool, *redis.Client) {
+// initStorage inits repository depend on flags.
+func initStorage(
+	flags config.AppFlags,
+	cfg config.Config,
+	log *slog.Logger) (repository.URL, *pgxpool.Pool, *redis.Client) {
 	var (
 		urlRepo     repository.URL
 		dbPool      *pgxpool.Pool
@@ -102,7 +106,8 @@ func initStorage(flags config.AppFlags, cfg config.Config, log *slog.Logger) (re
 	)
 
 	if flags.UseInMemStorage {
-		partitionsNumber := runtime.GOMAXPROCS(0) * 2
+		const threadsFactor = 2
+		partitionsNumber := runtime.GOMAXPROCS(0) * threadsFactor
 		kv := pkginmem.NewPartitionedKVStorage(partitionsNumber)
 		urlRepo = inmem.NewURLRepository(kv)
 		log.Info("Using in-memory storage")
@@ -131,7 +136,7 @@ func initStorage(flags config.AppFlags, cfg config.Config, log *slog.Logger) (re
 	return urlRepo, dbPool, redisClient
 }
 
-// shutdownServices gracefully shutdown apps
+// shutdownServices gracefully shutdown apps.
 func shutdownServices(grpcApp *grpcapp.App, httpApp *httpapp.App) error {
 	grpcApp.Stop()
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

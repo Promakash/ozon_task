@@ -55,7 +55,7 @@ func TestPartitionedKVStorage_ConcurrentRead(t *testing.T) {
 	const workers = 1000
 
 	wg.Add(workers)
-	for i := 0; i < workers; i++ {
+	for range workers {
 		go func() {
 			defer wg.Done()
 			val, ok := storage.Get("key")
@@ -82,7 +82,7 @@ func TestPartitionedKVStorage_ConcurrentWrite(t *testing.T) {
 	var wg sync.WaitGroup
 
 	wg.Add(BenchmarkIterations)
-	for i := 0; i < BenchmarkIterations; i++ {
+	for range BenchmarkIterations {
 		go func() {
 			randKey := randString(rand.IntN(maxStrSize))
 			randVal := randString(rand.IntN(maxStrSize))
@@ -99,7 +99,7 @@ func BenchmarkPartitionedKVStorage(b *testing.B) {
 
 	wg.Add(BenchmarkIterations)
 	b.ResetTimer()
-	for i := 0; i < BenchmarkIterations; i++ {
+	for range BenchmarkIterations {
 		go func() {
 			randKey := randString(rand.IntN(maxStrSize))
 			if write := rand.IntN(2); write == 1 {
@@ -120,7 +120,7 @@ func BenchmarkSyncMap(b *testing.B) {
 
 	wg.Add(BenchmarkIterations)
 	b.ResetTimer()
-	for i := 0; i < BenchmarkIterations; i++ {
+	for range BenchmarkIterations {
 		go func() {
 			randKey := randString(rand.IntN(maxStrSize))
 			if write := rand.IntN(2); write == 1 {
@@ -142,7 +142,7 @@ func BenchmarkMapRWMutex(b *testing.B) {
 
 	wg.Add(BenchmarkIterations)
 	b.ResetTimer()
-	for i := 0; i < BenchmarkIterations; i++ {
+	for range BenchmarkIterations {
 		go func() {
 			randKey := randString(rand.IntN(maxStrSize))
 			if write := rand.IntN(2); write == 1 {

@@ -7,7 +7,7 @@ definitions:
     type: object
   types.GetOriginalURLResponse:
     properties:
-      originalURL:
+      original_url:
         type: string
     type: object
   types.PostShortURLRequest:
@@ -28,48 +28,7 @@ info:
   title: URL Shortener API
   version: "1.0"
 paths:
-  /urls:
-    post:
-      consumes:
-      - application/json
-      description: |-
-        Accepts a JSON payload containing the original URL and returns a generated shortened URL.
-
-        The provided `original_url` must be a valid URL with top level domain
-        - If the URL does not include an HTTP scheme (`http://` or `https://`), the service will automatically prepend `https://`.
-
-        If a shortened URL already exists for the given original URL, the existing shortened URL will be returned.
-      parameters:
-      - description: Original URL (must be publicly accessible; if no HTTP scheme
-          is provided, `https://` is added automatically; URLs with more than 10 redirects
-          return the last reachable state).
-        in: body
-        name: original_url
-        required: true
-        schema:
-          $ref: '#/definitions/types.PostShortURLRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully created or retrieved an existing shortened URL
-          schema:
-            $ref: '#/definitions/types.PostShortURLResponse'
-        "400":
-          description: 'Invalid request: the provided URL is malformed, or empty'
-          schema:
-            $ref: '#/definitions/responses.ErrorResponse'
-        "408":
-          description: 'Request timeout: exceeded server execution time or client
-            disconnected'
-          schema:
-            $ref: '#/definitions/responses.ErrorResponse'
-        "500":
-          description: Internal service error
-          schema:
-            $ref: '#/definitions/responses.ErrorResponse'
-      summary: Create a shortened URL
-  /urls/{shortened}:
+  /resolve/{shortened}:
     get:
       description: |-
         Given a shortened URL, returns the corresponding original URL.
@@ -111,4 +70,45 @@ paths:
           schema:
             $ref: '#/definitions/responses.ErrorResponse'
       summary: Retrieve the original URL
+  /shorten:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Accepts a JSON payload containing the original URL and returns a generated shortened URL.
+
+        The provided `original_url` must be a valid URL with top level domain
+        - If the URL does not include an HTTP scheme (`http://` or `https://`), the service will automatically prepend `https://`.
+
+        If a shortened URL already exists for the given original URL, the existing shortened URL will be returned.
+      parameters:
+      - description: Original URL (must be publicly accessible; if no HTTP scheme
+          is provided, `https://` is added automatically; URLs with more than 10 redirects
+          return the last reachable state).
+        in: body
+        name: original_url
+        required: true
+        schema:
+          $ref: '#/definitions/types.PostShortURLRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully created or retrieved an existing shortened URL
+          schema:
+            $ref: '#/definitions/types.PostShortURLResponse'
+        "400":
+          description: 'Invalid request: the provided URL is malformed, or empty'
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "408":
+          description: 'Request timeout: exceeded server execution time or client
+            disconnected'
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal service error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Create a shortened URL
 swagger: "2.0"

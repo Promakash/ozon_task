@@ -7,10 +7,11 @@ import (
 	"ozon_task/pkg/infra/cache"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"ozon_task/domain"
 	"ozon_task/internal/repository"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type URLRepository struct {
@@ -20,7 +21,12 @@ type URLRepository struct {
 	cacheWriteTimeout time.Duration
 }
 
-func NewURLRepository(pool *pgxpool.Pool, cache cache.Cache, cacheTTL, cacheWriteTimeout time.Duration) repository.URL {
+func NewURLRepository(
+	pool *pgxpool.Pool,
+	cache cache.Cache,
+	cacheTTL,
+	cacheWriteTimeout time.Duration,
+) repository.URL {
 	return &URLRepository{
 		pool:              pool,
 		cache:             cache,
@@ -29,7 +35,11 @@ func NewURLRepository(pool *pgxpool.Pool, cache cache.Cache, cacheTTL, cacheWrit
 	}
 }
 
-func (r *URLRepository) CreateOrGetShortenedURL(ctx context.Context, original domain.URL, shortened domain.ShortURL) (domain.ShortURL, error) {
+func (r *URLRepository) CreateOrGetShortenedURL(
+	ctx context.Context,
+	original domain.URL,
+	shortened domain.ShortURL,
+) (domain.ShortURL, error) {
 	var result domain.URL
 
 	// used update on in case of concurrent inserting
@@ -51,7 +61,10 @@ func (r *URLRepository) CreateOrGetShortenedURL(ctx context.Context, original do
 	return result, nil
 }
 
-func (r *URLRepository) GetOriginalURLByShortened(ctx context.Context, shortened domain.ShortURL) (domain.URL, error) {
+func (r *URLRepository) GetOriginalURLByShortened(
+	ctx context.Context,
+	shortened domain.ShortURL,
+) (domain.URL, error) {
 	var original domain.URL
 	if err := r.cache.Get(ctx, shortened, &original); err == nil {
 		return original, nil
@@ -73,7 +86,10 @@ func (r *URLRepository) GetOriginalURLByShortened(ctx context.Context, shortened
 	return original, nil
 }
 
-func (r *URLRepository) GetShortenedURLByOriginal(ctx context.Context, original domain.URL) (domain.ShortURL, error) {
+func (r *URLRepository) GetShortenedURLByOriginal(
+	ctx context.Context,
+	original domain.URL,
+) (domain.ShortURL, error) {
 	var shortened domain.ShortURL
 	if err := r.cache.Get(ctx, original, &shortened); err == nil {
 		return shortened, nil
@@ -97,7 +113,8 @@ func (r *URLRepository) GetShortenedURLByOriginal(ctx context.Context, original 
 
 func (r *URLRepository) cacheURLs(original domain.URL, shortened domain.ShortURL) {
 	// r.cacheWriteTimeout*2 because we have two write operations
-	ctx, cancel := context.WithTimeout(context.Background(), r.cacheWriteTimeout*2)
+	const operationsCount = 2
+	ctx, cancel := context.WithTimeout(context.Background(), r.cacheWriteTimeout*operationsCount)
 	defer cancel()
 	_ = r.cache.Set(ctx, original, shortened, r.cacheTTL)
 	_ = r.cache.Set(ctx, shortened, original, r.cacheTTL)

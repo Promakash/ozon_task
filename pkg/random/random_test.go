@@ -33,7 +33,7 @@ func TestNewRandomString_Collisions(t *testing.T) {
 	iterations := 1000000
 
 	seen := make(map[string]struct{}, iterations)
-	for i := 0; i < iterations; i++ {
+	for i := range iterations {
 		s, err := NewRandomString(size, alphabet)
 		if err != nil {
 			t.Fatalf("Error generating random string: %v", err)

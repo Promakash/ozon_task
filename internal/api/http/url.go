@@ -3,8 +3,6 @@ package http
 import (
 	"context"
 	"errors"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"log/slog"
 	"net/http"
 	"ozon_task/domain"
@@ -15,6 +13,9 @@ import (
 	resp "ozon_task/pkg/http/responses"
 	pkglog "ozon_task/pkg/log"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 type URLHandler struct {
@@ -31,8 +32,8 @@ func NewURLHandler(logger *slog.Logger, service usecases.URL, responseTimeout ti
 	}
 }
 
-const postShortPath = "/urls"
-const getOriginalPath = "/urls/{shortened}"
+const postShortPath = "/shorten"
+const getOriginalPath = "/resolve/{shortened}"
 
 func (h *URLHandler) WithURLHandlers() handlers.RouterOption {
 	return func(r chi.Router) {
@@ -56,7 +57,7 @@ func (h *URLHandler) WithURLHandlers() handlers.RouterOption {
 // @Failure		400				{object}	responses.ErrorResponse		"Invalid request: the provided URL is malformed, or empty"
 // @Failure		408				{object}	responses.ErrorResponse		"Request timeout: exceeded server execution time or client disconnected"
 // @Failure		500				{object}	responses.ErrorResponse		"Internal service error"
-// @Router			/urls [post]
+// @Router			/shorten [post]
 func (h *URLHandler) postShortURL(r *http.Request) resp.Response {
 	const op = "URLHandler.postShortURL"
 	log := h.logger.With(
@@ -96,7 +97,7 @@ func (h *URLHandler) postShortURL(r *http.Request) resp.Response {
 // @Failure		404			{object}	responses.ErrorResponse			"Shortened URL not found in the system"
 // @Failure		408			{object}	responses.ErrorResponse			"Request timeout: exceeded server execution time or client disconnected"
 // @Failure		500			{object}	responses.ErrorResponse			"Internal service error"
-// @Router			/urls/{shortened} [get]
+// @Router			/resolve/{shortened} [get]
 func (h *URLHandler) getOriginalURL(r *http.Request) resp.Response {
 	const op = "URLHandler.getOriginalURL"
 	log := h.logger.With(

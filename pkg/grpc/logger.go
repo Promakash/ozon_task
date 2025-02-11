@@ -2,8 +2,9 @@ package grpc
 
 import (
 	"context"
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"log/slog"
+
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 )
 
 func InterceptorLogger(l *slog.Logger) logging.Logger {

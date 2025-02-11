@@ -8,7 +8,7 @@ type AppFlags struct {
 }
 
 func ParseFlags() AppFlags {
-	redis := flag.Bool("redis", false, "Use redis as app's cache")
+	redis := flag.Bool("redis", false, "Use redis as app's cache (doesn't work if inmem is true)")
 	inMem := flag.Bool("inmem", false, "Use inmemory storage instead of postgres")
 	flag.Parse()
 

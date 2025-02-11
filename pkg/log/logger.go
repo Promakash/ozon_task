@@ -11,7 +11,7 @@ import (
 type Config struct {
 	Level     string `yaml:"level" env-default:"info"`
 	Format    string `yaml:"format" env-default:"text"`
-	Directory string `yaml:"directory"`
+	Directory string `yaml:"directory" env-default:""`
 }
 
 func NewLogger(cfg Config) (*slog.Logger, *os.File) {
@@ -57,7 +57,7 @@ func NewLogger(cfg Config) (*slog.Logger, *os.File) {
 
 func createLogFile(directory string) (*os.File, error) {
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
-		if err := os.MkdirAll(directory, 0755); err != nil {
+		if err = os.MkdirAll(directory, 0755); err != nil {
 			return nil, err
 		}
 	}

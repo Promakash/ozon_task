@@ -1,14 +1,16 @@
 package tests
 
 import (
-	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"github.com/stretchr/testify/require"
 	"ozon_task/domain"
 	"ozon_task/pkg/random"
 	urlshortenerv1 "ozon_task/protos/gen/go"
 	"ozon_task/tests/suite"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestShortenURL_SuccessURLs(t *testing.T) {
@@ -31,7 +33,7 @@ func TestShortenURL_SuccessURLs(t *testing.T) {
 		})
 		code, _ := status.FromError(err)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, test.expectedStatus, code.Code())
 		assert.NotEmpty(t, res.GetShortenedUrl())
 	}
@@ -47,14 +49,14 @@ func TestShortenURL_SameURL(t *testing.T) {
 		OriginalUrl: validURL,
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, res.GetShortenedUrl())
 
 	resSecond, err := st.URLClient.ShortenURL(ctx, &urlshortenerv1.ShortenURLRequest{
 		OriginalUrl: validURL,
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, resSecond.GetShortenedUrl())
 
 	assert.Equal(t, res.GetShortenedUrl(), resSecond.GetShortenedUrl())
@@ -82,7 +84,7 @@ func TestShortenURL_InvalidURLs(t *testing.T) {
 		})
 		code, _ := status.FromError(err)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, test.expectedStatus, code.Code())
 	}
 }
@@ -98,7 +100,7 @@ func TestResolveURL_Success(t *testing.T) {
 	})
 	code, _ := status.FromError(err)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, codes.OK, code.Code())
 	assert.NotEmpty(t, res.GetShortenedUrl())
 
@@ -107,7 +109,7 @@ func TestResolveURL_Success(t *testing.T) {
 	})
 	code, _ = status.FromError(err)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, codes.OK, code.Code())
 	assert.NotEmpty(t, resolveResp.GetOriginalUrl())
 }
@@ -132,7 +134,7 @@ func TestShortenURL_InvalidShorts(t *testing.T) {
 		})
 		code, _ := status.FromError(err)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, test.expectedStatus, code.Code())
 	}
 }
@@ -140,7 +142,7 @@ func TestShortenURL_InvalidShorts(t *testing.T) {
 func TestShortenURL_NotFound(t *testing.T) {
 	t.Parallel()
 	validShort, err := random.NewRandomString(domain.ShortenedURLSize, domain.AllowedSymbols)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	ctx, st := suite.NewGRPCSuite(t)
 
@@ -149,6 +151,6 @@ func TestShortenURL_NotFound(t *testing.T) {
 	})
 	code, _ := status.FromError(err)
 
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Equal(t, codes.NotFound, code.Code())
 }

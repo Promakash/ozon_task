@@ -3,12 +3,13 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"ozon_task/domain"
 	"ozon_task/internal/repository/mocks"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/mock"
 )
 
 func TestShortenURL_NewURL(t *testing.T) {
@@ -19,13 +20,16 @@ func TestShortenURL_NewURL(t *testing.T) {
 	ctx := context.Background()
 	originalURL := "https://finance.ozon.ru"
 
-	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).Return("", domain.ErrShortenedNotFound)
-	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).Return("", domain.ErrOriginalNotFound)
-	mockRepo.On("CreateOrGetShortenedURL", mock.Anything, originalURL, mock.Anything).Return(mock.Anything, nil)
+	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).
+		Return("", domain.ErrShortenedNotFound)
+	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).
+		Return("", domain.ErrOriginalNotFound)
+	mockRepo.On("CreateOrGetShortenedURL", mock.Anything, originalURL, mock.Anything).
+		Return(mock.Anything, nil)
 
 	_, err := svc.ShortenURL(ctx, originalURL)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	mockRepo.AssertExpectations(t)
 }
@@ -39,12 +43,13 @@ func TestShortenURL_ExistedURL(t *testing.T) {
 	originalURL := "https://finance.ozon.ru"
 	shortenedURL := "abc123"
 
-	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).Return(shortenedURL, nil)
+	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).
+		Return(shortenedURL, nil)
 
 	result, err := svc.ShortenURL(ctx, originalURL)
 
-	assert.NoError(t, err)
-	assert.Equal(t, shortenedURL, result)
+	require.NoError(t, err)
+	require.Equal(t, shortenedURL, result)
 
 	mockRepo.AssertExpectations(t)
 }
@@ -57,14 +62,18 @@ func TestShortenURL_RetryOnCollision(t *testing.T) {
 	ctx := context.Background()
 	originalURL := "https://finance.ozon.ru"
 
-	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).Return("", domain.ErrShortenedNotFound)
-	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).Return("https://ozon.ru", nil).Once()
-	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).Return("", domain.ErrOriginalNotFound)
-	mockRepo.On("CreateOrGetShortenedURL", mock.Anything, originalURL, mock.Anything).Return(mock.Anything, nil)
+	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).
+		Return("", domain.ErrShortenedNotFound)
+	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).
+		Return("https://ozon.ru", nil).Once()
+	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).
+		Return("", domain.ErrOriginalNotFound)
+	mockRepo.On("CreateOrGetShortenedURL", mock.Anything, originalURL, mock.Anything).
+		Return(mock.Anything, nil)
 
 	_, err := svc.ShortenURL(ctx, originalURL)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	mockRepo.AssertExpectations(t)
 }
@@ -80,13 +89,15 @@ func TestShortenURL_ContextTimeout(t *testing.T) {
 	defer cancel()
 	originalURL := "https://finance.ozon.ru"
 
-	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).Return("", domain.ErrOriginalNotFound)
-	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).Return("https://ozon.ru", nil)
+	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).
+		Return("", domain.ErrOriginalNotFound)
+	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).
+		Return("", context.DeadlineExceeded)
 
 	result, err := svc.ShortenURL(ctx, originalURL)
 
-	assert.Error(t, err)
-	assert.Empty(t, result)
+	require.Error(t, err)
+	require.Empty(t, result)
 }
 
 func TestShortenURL_UnexpectedDBError(t *testing.T) {
@@ -97,12 +108,13 @@ func TestShortenURL_UnexpectedDBError(t *testing.T) {
 	ctx := context.Background()
 	originalURL := "https://finance.ozon.ru"
 
-	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).Return("", errors.New("no connection to the db"))
+	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).
+		Return("", errors.New("no connection to the db"))
 
 	result, err := svc.ShortenURL(ctx, originalURL)
 
-	assert.Error(t, err)
-	assert.Empty(t, result)
+	require.Error(t, err)
+	require.Empty(t, result)
 
 	mockRepo.AssertExpectations(t)
 }
@@ -116,12 +128,13 @@ func TestResolveURL_ExistedURL(t *testing.T) {
 	shortenedURL := "abc123"
 	originalURL := "https://finance.ozon.ru"
 
-	mockRepo.On("GetOriginalURLByShortened", mock.Anything, shortenedURL).Return(originalURL, nil)
+	mockRepo.On("GetOriginalURLByShortened", mock.Anything, shortenedURL).
+		Return(originalURL, nil)
 
 	result, err := svc.ResolveURL(ctx, shortenedURL)
 
-	assert.NoError(t, err)
-	assert.Equal(t, originalURL, result)
+	require.NoError(t, err)
+	require.Equal(t, originalURL, result)
 
 	mockRepo.AssertExpectations(t)
 }
@@ -134,13 +147,14 @@ func TestResolveURL_NotFound(t *testing.T) {
 	ctx := context.Background()
 	shortenedURL := "abc123"
 
-	mockRepo.On("GetOriginalURLByShortened", mock.Anything, shortenedURL).Return("", domain.ErrOriginalNotFound)
+	mockRepo.On("GetOriginalURLByShortened", mock.Anything, shortenedURL).
+		Return("", domain.ErrOriginalNotFound)
 
 	result, err := svc.ResolveURL(ctx, shortenedURL)
 
-	assert.Error(t, err)
-	assert.Empty(t, result)
-	assert.Equal(t, true, errors.Is(err, domain.ErrOriginalNotFound))
+	require.Error(t, err)
+	require.Empty(t, result)
+	require.ErrorIs(t, err, domain.ErrOriginalNotFound)
 
 	mockRepo.AssertExpectations(t)
 }

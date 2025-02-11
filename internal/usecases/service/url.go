@@ -19,7 +19,7 @@ func NewURLService(repo repository.URL) *URLService {
 	}
 }
 
-// generateShortURL tries to generate unique shortURL until success or context cancellation
+// generateShortURL tries to generate unique shortURL until success or context cancellation.
 func (s *URLService) generateShortURL(ctx context.Context) (domain.ShortURL, error) {
 	for {
 		select {
@@ -43,7 +43,6 @@ func (s *URLService) generateShortURL(ctx context.Context) (domain.ShortURL, err
 }
 
 func (s *URLService) ShortenURL(ctx context.Context, original domain.URL) (domain.ShortURL, error) {
-
 	shortened, err := s.repo.GetShortenedURLByOriginal(ctx, original)
 	if err == nil {
 		return shortened, nil

@@ -5,21 +5,28 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"ozon_task/domain"
 	"ozon_task/internal/api/http/types"
 	"ozon_task/pkg/random"
 	"ozon_task/tests/suite"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const (
-	PostShortPath  = "api/v1/urls"
-	GetOriginalURL = "api/v1/urls"
+	PostShortPath  = "api/v1/shorten"
+	GetOriginalURL = "api/v1/resolve"
 )
 
-func SendPostRequest(ctx context.Context, client *http.Client, baseURL, path string, payload types.PostShortURLRequest) (*http.Response, error) {
+func SendPostRequest(
+	ctx context.Context,
+	client *http.Client,
+	baseURL, path string,
+	payload types.PostShortURLRequest,
+) (*http.Response, error) {
 	fullURL := fmt.Sprintf("%s/%s", baseURL, path)
 
 	bodyBytes, err := json.Marshal(payload)
@@ -32,19 +39,24 @@ func SendPostRequest(ctx context.Context, client *http.Client, baseURL, path str
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.WithContext(ctx)
+	req = req.WithContext(ctx)
 
 	return client.Do(req)
 }
 
-func SendGetRequest(ctx context.Context, client *http.Client, baseURL, path string, queryParam domain.ShortURL) (*http.Response, error) {
+func SendGetRequest(
+	ctx context.Context,
+	client *http.Client,
+	baseURL, path string,
+	queryParam domain.ShortURL,
+) (*http.Response, error) {
 	fullURL := fmt.Sprintf("%s/%s/%s", baseURL, path, queryParam)
 
 	req, err := http.NewRequest(http.MethodGet, fullURL, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.WithContext(ctx)
+	req = req.WithContext(ctx)
 
 	return client.Do(req)
 }
@@ -65,13 +77,19 @@ func TestPostShortURL_SuccessURLs(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := SendPostRequest(ctx, st.Client, st.BaseURL, PostShortPath, types.PostShortURLRequest{OriginalURL: test.url})
-			assert.NoError(t, err)
+			res, err := SendPostRequest(
+				ctx,
+				st.Client,
+				st.BaseURL,
+				PostShortPath,
+				types.PostShortURLRequest{OriginalURL: test.url},
+			)
+			require.NoError(t, err)
 			assert.Equal(t, test.expectedStatus, res.StatusCode)
 
 			var response types.PostShortURLResponse
 			err = json.NewDecoder(res.Body).Decode(&response)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.NotEmpty(t, response.ShortenedURL)
 		})
@@ -84,21 +102,33 @@ func TestPostShortURL_SameURL(t *testing.T) {
 
 	const validURL = "https://finance.ozon.ru/docs/legal#legal"
 
-	res, err := SendPostRequest(ctx, st.Client, st.BaseURL, PostShortPath, types.PostShortURLRequest{OriginalURL: validURL})
-	assert.NoError(t, err)
+	res, err := SendPostRequest(
+		ctx,
+		st.Client,
+		st.BaseURL,
+		PostShortPath,
+		types.PostShortURLRequest{OriginalURL: validURL},
+	)
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 
 	var firstResponse types.PostShortURLResponse
 	err = json.NewDecoder(res.Body).Decode(&firstResponse)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	resSecond, err := SendPostRequest(ctx, st.Client, st.BaseURL, PostShortPath, types.PostShortURLRequest{OriginalURL: validURL})
-	assert.NoError(t, err)
+	resSecond, err := SendPostRequest(
+		ctx,
+		st.Client,
+		st.BaseURL,
+		PostShortPath,
+		types.PostShortURLRequest{OriginalURL: validURL},
+	)
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resSecond.StatusCode)
 
 	var secondResponse types.PostShortURLResponse
 	err = json.NewDecoder(resSecond.Body).Decode(&secondResponse)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, firstResponse.ShortenedURL, secondResponse.ShortenedURL)
 }
@@ -121,8 +151,14 @@ func TestPostShortURL_InvalidURLs(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := SendPostRequest(ctx, st.Client, st.BaseURL, PostShortPath, types.PostShortURLRequest{OriginalURL: test.url})
-			assert.NoError(t, err)
+			res, err := SendPostRequest(
+				ctx,
+				st.Client,
+				st.BaseURL,
+				PostShortPath,
+				types.PostShortURLRequest{OriginalURL: test.url},
+			)
+			require.NoError(t, err)
 			assert.Equal(t, test.expectedStatus, res.StatusCode)
 		})
 	}
@@ -134,21 +170,33 @@ func TestGetOriginalURL_Success(t *testing.T) {
 
 	const validURL = "https://finance.ozon.ru/docs"
 
-	res, err := SendPostRequest(ctx, st.Client, st.BaseURL, PostShortPath, types.PostShortURLRequest{OriginalURL: validURL})
-	assert.NoError(t, err)
+	res, err := SendPostRequest(
+		ctx,
+		st.Client,
+		st.BaseURL,
+		PostShortPath,
+		types.PostShortURLRequest{OriginalURL: validURL},
+	)
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 
 	var response types.PostShortURLResponse
 	err = json.NewDecoder(res.Body).Decode(&response)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	resolveResp, err := SendGetRequest(ctx, st.Client, st.BaseURL, GetOriginalURL, response.ShortenedURL)
-	assert.NoError(t, err)
+	resolveResp, err := SendGetRequest(
+		ctx,
+		st.Client,
+		st.BaseURL,
+		GetOriginalURL,
+		response.ShortenedURL,
+	)
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resolveResp.StatusCode)
 
 	var resolveResponse types.GetOriginalURLResponse
 	err = json.NewDecoder(resolveResp.Body).Decode(&resolveResponse)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, validURL, resolveResponse.OriginalURL)
 }
@@ -169,8 +217,14 @@ func TestGetOriginalURL_InvalidShorts(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res, err := SendGetRequest(ctx, st.Client, st.BaseURL, GetOriginalURL, test.url)
-			assert.NoError(t, err)
+			res, err := SendGetRequest(
+				ctx,
+				st.Client,
+				st.BaseURL,
+				GetOriginalURL,
+				test.url,
+			)
+			require.NoError(t, err)
 			assert.Equal(t, test.expectedStatus, res.StatusCode)
 		})
 	}
@@ -181,9 +235,15 @@ func TestGetOriginalURL_NotFound(t *testing.T) {
 	ctx, st := suite.NewHTTPSuite(t)
 
 	validShort, err := random.NewRandomString(domain.ShortenedURLSize, domain.AllowedSymbols)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	res, err := SendGetRequest(ctx, st.Client, st.BaseURL, GetOriginalURL, validShort)
-	assert.NoError(t, err)
+	res, err := SendGetRequest(
+		ctx,
+		st.Client,
+		st.BaseURL,
+		GetOriginalURL,
+		validShort,
+	)
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusNotFound, res.StatusCode)
 }

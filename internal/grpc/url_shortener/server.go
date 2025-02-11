@@ -3,9 +3,6 @@ package url_shortener
 import (
 	"context"
 	"errors"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"log/slog"
 	"ozon_task/domain"
 	"ozon_task/internal/usecases"
@@ -13,6 +10,10 @@ import (
 	pkglog "ozon_task/pkg/log"
 	urlshortenerv1 "ozon_task/protos/gen/go"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type gRPCServerAPI struct {
@@ -22,7 +23,11 @@ type gRPCServerAPI struct {
 	logger            *slog.Logger
 }
 
-func Register(gRPC *grpc.Server, service usecases.URL, operationsTimeout time.Duration, logger *slog.Logger) {
+func Register(gRPC *grpc.Server,
+	service usecases.URL,
+	operationsTimeout time.Duration,
+	logger *slog.Logger,
+) {
 	urlshortenerv1.RegisterURLShortenerServer(gRPC, &gRPCServerAPI{
 		service:           service,
 		operationsTimeout: operationsTimeout,

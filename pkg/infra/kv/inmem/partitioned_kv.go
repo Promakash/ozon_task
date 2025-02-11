@@ -12,7 +12,7 @@ type PartitionedKVStorage struct {
 
 func NewPartitionedKVStorage(numPartitions int) kv.Storage {
 	partitions := make([]*Partition, numPartitions)
-	for i := 0; i < numPartitions; i++ {
+	for i := range numPartitions {
 		partitions[i] = NewPartition()
 	}
 

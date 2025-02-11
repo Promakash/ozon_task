@@ -10,56 +10,7 @@
     "host": "localhost:8080",
     "basePath": "/api/v1/",
     "paths": {
-        "/urls": {
-            "post": {
-                "description": "Accepts a JSON payload containing the original URL and returns a generated shortened URL.\n\nThe provided `original_url` must be a valid URL with top level domain\n- If the URL does not include an HTTP scheme (`http://` or `https://`), the service will automatically prepend `https://`.\n\nIf a shortened URL already exists for the given original URL, the existing shortened URL will be returned.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Create a shortened URL",
-                "parameters": [
-                    {
-                        "description": "Original URL (must be publicly accessible; if no HTTP scheme is provided, `https://` is added automatically; URLs with more than 10 redirects return the last reachable state).",
-                        "name": "original_url",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.PostShortURLRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully created or retrieved an existing shortened URL",
-                        "schema": {
-                            "$ref": "#/definitions/types.PostShortURLResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request: the provided URL is malformed, or empty",
-                        "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
-                        }
-                    },
-                    "408": {
-                        "description": "Request timeout: exceeded server execution time or client disconnected",
-                        "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal service error",
-                        "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/urls/{shortened}": {
+        "/resolve/{shortened}": {
             "get": {
                 "description": "Given a shortened URL, returns the corresponding original URL.\n\nThe `shortened` URL must be exactly **10 characters long** and consist only of:\n- Uppercase and lowercase English letters (`A-Z, a-z`)\n- Digits (`0-9`)\n- Underscore (`_`)",
                 "produces": [
@@ -108,6 +59,55 @@
                     }
                 }
             }
+        },
+        "/shorten": {
+            "post": {
+                "description": "Accepts a JSON payload containing the original URL and returns a generated shortened URL.\n\nThe provided `original_url` must be a valid URL with top level domain\n- If the URL does not include an HTTP scheme (`http://` or `https://`), the service will automatically prepend `https://`.\n\nIf a shortened URL already exists for the given original URL, the existing shortened URL will be returned.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create a shortened URL",
+                "parameters": [
+                    {
+                        "description": "Original URL (must be publicly accessible; if no HTTP scheme is provided, `https://` is added automatically; URLs with more than 10 redirects return the last reachable state).",
+                        "name": "original_url",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.PostShortURLRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully created or retrieved an existing shortened URL",
+                        "schema": {
+                            "$ref": "#/definitions/types.PostShortURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request: the provided URL is malformed, or empty",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    },
+                    "408": {
+                        "description": "Request timeout: exceeded server execution time or client disconnected",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal service error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -122,7 +122,7 @@
         "types.GetOriginalURLResponse": {
             "type": "object",
             "properties": {
-                "originalURL": {
+                "original_url": {
                     "type": "string"
                 }
             }
