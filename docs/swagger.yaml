@@ -37,7 +37,7 @@ paths:
 
         The provided `original_url` must be a valid, publicly accessible URL.
         - If the URL does not include an HTTP scheme (`http://` or `https://`), the service will automatically prepend `https://`.
-        - If the provided URL results in more than **10 redirects**, the response will contain the URL state at the **10th redirect**.
+        - If the provided URL results in more than **1 redirect**, the response will contain the URL state at the **1st redirect**.
 
         If a shortened URL already exists for the given original URL, the existing shortened URL will be returned.
       parameters:

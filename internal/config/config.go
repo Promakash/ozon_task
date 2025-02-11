@@ -2,6 +2,7 @@ package config
 
 import (
 	"ozon_task/pkg/infra"
+	"ozon_task/pkg/infra/cache/redis"
 	pkglog "ozon_task/pkg/log"
 	"time"
 )
@@ -17,7 +18,8 @@ type HTTPConfig struct {
 type Config struct {
 	HTTPServer HTTPConfig           `yaml:"http_server" env-required:"true"`
 	GRPC       GRPCConfig           `yaml:"grpc" env-required:"true"`
-	PG         infra.PostgresConfig `yaml:"postgres" env-required:"true"`
+	PG         infra.PostgresConfig `yaml:"postgres"`
+	Redis      redis.Config         `yaml:"redis"`
 	Logger     pkglog.Config        `yaml:"logger" env-required:"true"`
 }
 

@@ -17,7 +17,6 @@ func NewPartition() *Partition {
 
 func (p *Partition) Set(key, val string) {
 	p.m.Lock()
-	defer p.m.Unlock()
 
 	if oldVal, exists := p.bucket[key]; exists {
 		delete(p.reverseBucket, oldVal)
@@ -25,18 +24,12 @@ func (p *Partition) Set(key, val string) {
 
 	p.bucket[key] = val
 	p.reverseBucket[val] = key
+	p.m.Unlock()
 }
 
 func (p *Partition) Get(key string) (string, bool) {
 	p.m.RLock()
-	defer p.m.RUnlock()
 	val, ok := p.bucket[key]
+	p.m.RUnlock()
 	return val, ok
-}
-
-func (p *Partition) GetByValue(val string) (string, bool) {
-	p.m.RLock()
-	defer p.m.RUnlock()
-	key, ok := p.reverseBucket[val]
-	return key, ok
 }

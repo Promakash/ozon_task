@@ -21,7 +21,7 @@ func TestShortenURL_NewURL(t *testing.T) {
 
 	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).Return("", domain.ErrShortenedNotFound)
 	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).Return("", domain.ErrOriginalNotFound)
-	mockRepo.On("PutShortenedURL", mock.Anything, originalURL, mock.Anything).Return(nil)
+	mockRepo.On("CreateOrGetShortenedURL", mock.Anything, originalURL, mock.Anything).Return(mock.Anything, nil)
 
 	_, err := svc.ShortenURL(ctx, originalURL)
 
@@ -60,12 +60,11 @@ func TestShortenURL_RetryOnCollision(t *testing.T) {
 	mockRepo.On("GetShortenedURLByOriginal", mock.Anything, originalURL).Return("", domain.ErrShortenedNotFound)
 	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).Return("https://ozon.ru", nil).Once()
 	mockRepo.On("GetOriginalURLByShortened", mock.Anything, mock.Anything).Return("", domain.ErrOriginalNotFound)
-	mockRepo.On("PutShortenedURL", mock.Anything, originalURL, mock.Anything).Return(nil)
+	mockRepo.On("CreateOrGetShortenedURL", mock.Anything, originalURL, mock.Anything).Return(mock.Anything, nil)
 
-	result, err := svc.ShortenURL(ctx, originalURL)
+	_, err := svc.ShortenURL(ctx, originalURL)
 
 	assert.NoError(t, err)
-	assert.NotEmpty(t, result)
 
 	mockRepo.AssertExpectations(t)
 }

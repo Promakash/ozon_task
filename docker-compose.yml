@@ -20,6 +20,7 @@ services:
       - SHORTENER_CONFIG=config/docker.yml
     volumes:
       - ./logs/url-shortener:/app/logs
+    entrypoint: ["./shortener-app"]
 
   storage:
     healthcheck:
@@ -35,6 +36,19 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
+
+  cache:
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    image: redis:latest
+    container_name: cache
+    environment:
+      REDIS_PASSWORD: redis
+    ports:
+      - "6379:6379"
 
   migrator:
     build:

@@ -38,12 +38,3 @@ func (ps *PartitionedKVStorage) Get(key string) (val string, ok bool) {
 	partition := ps.getPartition(key)
 	return partition.Get(key)
 }
-
-func (ps *PartitionedKVStorage) GetByValue(val string) (key string, ok bool) {
-	for _, partition := range ps.partitions {
-		if key, ok := partition.GetByValue(val); ok {
-			return key, true
-		}
-	}
-	return "", false
-}

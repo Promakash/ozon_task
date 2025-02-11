@@ -46,7 +46,7 @@ func (h *URLHandler) WithURLHandlers() handlers.RouterOption {
 // @Description
 // @Description The provided `original_url` must be a valid, publicly accessible URL.
 // @Description - If the URL does not include an HTTP scheme (`http://` or `https://`), the service will automatically prepend `https://`.
-// @Description - If the provided URL results in more than **10 redirects**, the response will contain the URL state at the **10th redirect**.
+// @Description - If the provided URL results in more than **1 redirect**, the response will contain the URL state at the **1st redirect**.
 // @Description
 // @Description If a shortened URL already exists for the given original URL, the existing shortened URL will be returned.
 //

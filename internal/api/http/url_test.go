@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"ozon_task/pkg/http/responses"
 	"ozon_task/pkg/random"
 	"testing"
@@ -25,7 +25,7 @@ import (
 	"ozon_task/internal/usecases/mocks"
 )
 
-var dummyLogger = slog.New(slog.NewTextHandler(os.Stdout, nil))
+var dummyLogger = slog.New(slog.NewTextHandler(io.Discard, nil))
 
 const responseTimeout = 5 * time.Second
 const getPath = "/urls/"

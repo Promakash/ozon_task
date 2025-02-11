@@ -3,7 +3,6 @@ package domain
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 )
@@ -15,24 +14,25 @@ var disallowedCodes = map[int]struct{}{
 }
 
 func IsValidOriginalURL(urlStr URL) (bool, error) {
-	parsed, err := url.Parse(urlStr)
-	if err != nil || len(parsed.Host) == 0 {
-		return false, ErrInvalidOriginal
+	if len(urlStr) == 0 {
+		return false, fmt.Errorf("IsValidOriginalURL: empty string: %w", ErrInvalidOriginal)
 	}
 
+	//HEAD used because it gets only headers, not all content from page
 	req, err := http.NewRequest("HEAD", urlStr, nil)
 	if err != nil {
-		return false, fmt.Errorf("IsValidOriginalURL: error creating request: %w", err)
+		return false, fmt.Errorf("IsValidOriginalURL: error creating request: %w", ErrInvalidOriginal)
 	}
 
+	//if Link is valid doesn't matter where it redirects
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= 10 {
+			if len(via) >= 1 {
 				return http.ErrUseLastResponse
 			}
 			return nil
 		},
-		Timeout: 2 * time.Second,
+		Timeout: 5 * time.Second,
 	}
 
 	resp, err := client.Do(req)

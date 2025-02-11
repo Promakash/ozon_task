@@ -19,4 +19,4 @@ WORKDIR /app
 COPY --from=build /build/shortener-app ./
 COPY --from=build /build/config ./config/
 
-CMD ["./shortener-app"]
+CMD ["./shortener-app", "-redis"]

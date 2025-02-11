@@ -18,7 +18,7 @@ const docTemplate = `{
     "paths": {
         "/urls": {
             "post": {
-                "description": "Accepts a JSON payload containing the original URL and returns a generated shortened URL.\n\nThe provided ` + "`" + `original_url` + "`" + ` must be a valid, publicly accessible URL.\n- If the URL does not include an HTTP scheme (` + "`" + `http://` + "`" + ` or ` + "`" + `https://` + "`" + `), the service will automatically prepend ` + "`" + `https://` + "`" + `.\n- If the provided URL results in more than **10 redirects**, the response will contain the URL state at the **10th redirect**.\n\nIf a shortened URL already exists for the given original URL, the existing shortened URL will be returned.",
+                "description": "Accepts a JSON payload containing the original URL and returns a generated shortened URL.\n\nThe provided ` + "`" + `original_url` + "`" + ` must be a valid, publicly accessible URL.\n- If the URL does not include an HTTP scheme (` + "`" + `http://` + "`" + ` or ` + "`" + `https://` + "`" + `), the service will automatically prepend ` + "`" + `https://` + "`" + `.\n- If the provided URL results in more than **1 redirect**, the response will contain the URL state at the **1st redirect**.\n\nIf a shortened URL already exists for the given original URL, the existing shortened URL will be returned.",
                 "consumes": [
                     "application/json"
                 ],

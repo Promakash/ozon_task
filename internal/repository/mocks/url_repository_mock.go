@@ -13,6 +13,34 @@ type URL struct {
 	mock.Mock
 }
 
+// CreateOrGetShortenedURL provides a mock function with given fields: ctx, original, shortened
+func (_m *URL) CreateOrGetShortenedURL(ctx context.Context, original string, shortened string) (string, error) {
+	ret := _m.Called(ctx, original, shortened)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateOrGetShortenedURL")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (string, error)); ok {
+		return rf(ctx, original, shortened)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) string); ok {
+		r0 = rf(ctx, original, shortened)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, original, shortened)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetOriginalURLByShortened provides a mock function with given fields: ctx, shortened
 func (_m *URL) GetOriginalURLByShortened(ctx context.Context, shortened string) (string, error) {
 	ret := _m.Called(ctx, shortened)
@@ -67,24 +95,6 @@ func (_m *URL) GetShortenedURLByOriginal(ctx context.Context, original string) (
 	}
 
 	return r0, r1
-}
-
-// PutShortenedURL provides a mock function with given fields: ctx, original, shortened
-func (_m *URL) PutShortenedURL(ctx context.Context, original string, shortened *string) error {
-	ret := _m.Called(ctx, original, shortened)
-
-	if len(ret) == 0 {
-		panic("no return value specified for PutShortenedURL")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, *string) error); ok {
-		r0 = rf(ctx, original, shortened)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
 }
 
 // NewURL creates a new instance of URL. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
